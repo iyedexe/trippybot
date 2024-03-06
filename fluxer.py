@@ -1,5 +1,6 @@
 import websocket
 import json
+import multiprocessing
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
@@ -10,17 +11,17 @@ class Fluxer:
 
     def subscribe_coins_message(self, ticker_list):
         return {
-            "method": "SUBSCRIBE",
-            "params": [
-                f"{ticker}@bookTicker" for ticker in ticker_list
-            ],
-            "id": 1
+        "id": "1",
+        "method": "ticker.book",
+        "params": {
+            "symbols": ticker_list
         }
-
+        }
+    
     def on_open(self, wsapp):
         print("connection open")
 
-        message_to_server = json.dumps(self.subscribe_coins_message())
+        message_to_server = json.dumps(self.subscribe_coins_message(self.ticker_list))
 
         print("sending message to server:")
         print(message_to_server)
@@ -29,6 +30,7 @@ class Fluxer:
     def on_message(self, wsapp, message):
         print("Receiving message from server:")
         print(message)
+        # on_open(self, wsapp)
 
     def on_error(wsapp, error):
         print(error)
@@ -44,7 +46,7 @@ class Fluxer:
     def on_pong(self, wsapp, message):
         print("received pong from server")
 
-    def run(self):
+    def run(self, q: multiprocessing.Queue):
         wsapp = websocket.WebSocketApp("wss://ws-api.binance.com/ws-api/v3",
                                         on_message=self.on_message,
                                         on_open=self.on_open,
