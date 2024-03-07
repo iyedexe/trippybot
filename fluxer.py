@@ -8,29 +8,15 @@ websocket.enableTrace(False)
 class Fluxer:
     def __init__(self, ticker_list):
         self.ticker_list = ticker_list
-
-    def subscribe_coins_message(self, ticker_list):
-        return {
-        "id": "1",
-        "method": "ticker.book",
-        "params": {
-            "symbols": ticker_list
-        }
-        }
-    
+        subscription_list =  [f"{ticker.lower()}@bookTicker" for ticker in ticker_list]
+        self.binance_socket = f"wss://stream.binance.com:9443/stream?streams={'/'.join(subscription_list)}"
+  
     def on_open(self, wsapp):
         print("connection open")
-
-        message_to_server = json.dumps(self.subscribe_coins_message(self.ticker_list))
-
-        print("sending message to server:")
-        print(message_to_server)
-        wsapp.send(message_to_server)
 
     def on_message(self, wsapp, message):
         print("Receiving message from server:")
         print(message)
-        # on_open(self, wsapp)
 
     def on_error(wsapp, error):
         print(error)
@@ -47,10 +33,20 @@ class Fluxer:
         print("received pong from server")
 
     def run(self, q: multiprocessing.Queue):
-        wsapp = websocket.WebSocketApp("wss://ws-api.binance.com/ws-api/v3",
+        wsapp = websocket.WebSocketApp(self.binance_socket,
                                         on_message=self.on_message,
                                         on_open=self.on_open,
                                         on_error=self.on_error,
                                         on_ping=self.on_ping,
                                         on_pong=self.on_pong)
         wsapp.run_forever()
+
+
+if __name__ == '__main__':
+    ticker_list = ["ETHBTC", "BNBBTC", "BNBETH"]
+    fluxer = Fluxer(ticker_list)
+    q = multiprocessing.Queue()
+    fluxer = multiprocessing.Process(name='fluxer', target=fluxer.run, args=(q,))
+    fluxer.start()
+
+

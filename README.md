@@ -6,3 +6,7 @@ https://github.com/binance/binance-signature-examples/blob/master/python/websock
 
 ws content:
 https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+
+
+good inspiration:
+https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-postgresql-db-5fnd
