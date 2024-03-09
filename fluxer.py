@@ -8,6 +8,9 @@ websocket.enableTrace(False)
 class Fluxer:
     def __init__(self, ticker_list):
         self.ticker_list = ticker_list
+        self.bid_price = {}
+        self.ask_price = {}
+        
         subscription_list =  [f"{ticker.lower()}@bookTicker" for ticker in ticker_list]
         self.binance_socket = f"wss://stream.binance.com:9443/stream?streams={'/'.join(subscription_list)}"
   
