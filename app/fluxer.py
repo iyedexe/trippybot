@@ -1,15 +1,17 @@
 import websocket
 import json
 import multiprocessing
+from strat import ArbitrageStrategy
+from fin import Transaction, Way, CoinPair
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
 
 class Fluxer:
-    def __init__(self, ticker_list):
+    def __init__(self, ticker_list, strat : ArbitrageStrategy):
         self.ticker_list = ticker_list
-        self.bid_price = {}
-        self.ask_price = {}
+        self.data = {}
+        self.strat = strat
         
         subscription_list =  [f"{ticker.lower()}@bookTicker" for ticker in ticker_list]
         self.binance_socket = f"wss://stream.binance.com:9443/stream?streams={'/'.join(subscription_list)}"
@@ -17,10 +19,25 @@ class Fluxer:
     def on_open(self, wsapp):
         print("connection open")
 
-    def on_message(self, wsapp, message):
-        print("Receiving message from server:")
-        print(message)
+    def store_message(self, message):
+        dict_message = json.loads(message)
+        data = dict_message.get("data")
+        if data is None:
+            return
+        ticker = data.get("s")
+        if ticker is None or ticker not in self.ticker_list:
+            return
+        self.data[ticker] = data
 
+    def on_message(self, wsapp, message):
+        try:            
+            # print(f"receiverd : {message}")
+            self.store_message(message)
+            self.strat.check_opportunity(self.data)
+            # self.q.push(signal)
+        except Exception as e:
+            print(f"exception : {e}")
+            
     def on_error(wsapp, error):
         print(error)
 
@@ -36,6 +53,7 @@ class Fluxer:
         print("received pong from server")
 
     def run(self, q: multiprocessing.Queue):
+        self.q = q
         wsapp = websocket.WebSocketApp(self.binance_socket,
                                         on_message=self.on_message,
                                         on_open=self.on_open,
@@ -46,9 +64,21 @@ class Fluxer:
 
 
 if __name__ == '__main__':
+    import requests
+    url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
+    
+    print(requests.get(url).json())
+    input()
     ticker_list = ["ETHBTC", "BNBBTC", "BNBETH"]
-    fluxer = Fluxer(ticker_list)
+    
     q = multiprocessing.Queue()
+    path = [
+        Transaction(CoinPair("ETH", "BTC"), Way.SELL),
+        Transaction(CoinPair("BNB", "BTC"), Way.BUY),
+        Transaction(CoinPair("BNB", "ETH"), Way.SELL),
+    ]
+    strat = ArbitrageStrategy(path)
+    fluxer = Fluxer(ticker_list, strat)
     fluxer = multiprocessing.Process(name='fluxer', target=fluxer.run, args=(q,))
     fluxer.start()
 
