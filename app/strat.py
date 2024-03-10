@@ -20,7 +20,6 @@ class ArbitrageStrategy:
         if self._bot is None:
             self._bot = telegram.Bot(token=self._telegram_api_key)
         cost = 1
-        # print(f"strategy data : {data}")
         for step in self.path:
             if data.get(step.get_ticker()) is None:
                 return False
@@ -30,8 +29,9 @@ class ArbitrageStrategy:
                 cost *= (1/float(data.get(step.get_ticker()).get("a")))
         fees = pow(1 - FEE/100, 3)
         cost *= fees
-        print(f"theo unitairy pnl = {cost}")
-
+        
         if cost>=1:
-            print(f"arbitrage opportunity, theo unitairy pnl = {cost}")
-            self.send_message(f"arbitrage opportunity, theo unitairy pnl = {cost}")
+            path_serial = [f'{step._way} {step.get_ticker()}@{data.get(step.get_ticker()).get("b" if step._way==Way.SELL else "a")}' for step in self.path]
+            path_description = f"data : {' && '.join(path_serial)}"
+            print(f"arbitrage opportunity, theo unitairy pnl = {cost}\n , path description = {path_description}")
+            self.send_message(f"arbitrage opportunity, theo unitairy pnl = {cost}\n , path description = {path_description}")

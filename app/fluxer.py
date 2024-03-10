@@ -1,9 +1,7 @@
 import websocket
 import json
-import configparser
 import multiprocessing
 from strat import ArbitrageStrategy
-from fin import Transaction, Way, CoinPair
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
@@ -62,24 +60,4 @@ class Fluxer:
                                         on_ping=self.on_ping,
                                         on_pong=self.on_pong)
         wsapp.run_forever()
-
-
-    
-if __name__ == '__main__':
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    
-    ticker_list = ["ETHBTC", "BNBBTC", "BNBETH"]
-    
-    q = multiprocessing.Queue()
-    path = [
-        Transaction(CoinPair("ETH", "BTC"), Way.SELL),
-        Transaction(CoinPair("BNB", "BTC"), Way.BUY),
-        Transaction(CoinPair("BNB", "ETH"), Way.SELL),
-    ]
-    strat = ArbitrageStrategy(path, config)
-    fluxer = Fluxer(ticker_list, strat)
-    fluxer = multiprocessing.Process(name='fluxer', target=fluxer.run, args=(q,))
-    fluxer.start()
-
-
+        
