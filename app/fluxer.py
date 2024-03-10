@@ -1,5 +1,6 @@
 import websocket
 import json
+import configparser
 import multiprocessing
 from strat import ArbitrageStrategy
 from fin import Transaction, Way, CoinPair
@@ -31,7 +32,7 @@ class Fluxer:
 
     def on_message(self, wsapp, message):
         try:            
-            # print(f"receiverd : {message}")
+            print(f"receiverd : {message}")
             self.store_message(message)
             self.strat.check_opportunity(self.data)
             # self.q.push(signal)
@@ -63,12 +64,11 @@ class Fluxer:
         wsapp.run_forever()
 
 
-if __name__ == '__main__':
-    import requests
-    url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
     
-    print(requests.get(url).json())
-    input()
+if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    
     ticker_list = ["ETHBTC", "BNBBTC", "BNBETH"]
     
     q = multiprocessing.Queue()
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         Transaction(CoinPair("BNB", "BTC"), Way.BUY),
         Transaction(CoinPair("BNB", "ETH"), Way.SELL),
     ]
-    strat = ArbitrageStrategy(path)
+    strat = ArbitrageStrategy(path, config)
     fluxer = Fluxer(ticker_list, strat)
     fluxer = multiprocessing.Process(name='fluxer', target=fluxer.run, args=(q,))
     fluxer.start()
