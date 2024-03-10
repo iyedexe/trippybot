@@ -11,9 +11,15 @@ https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.
 good inspiration:
 https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-postgresql-db-5fnd
 
+potential improvement:
+https://www.thealgorists.com/Algo/ShortestPaths/Arbitrage
 
 How to setup :
-python -m venv dodrio
+>python -m venv dodrio
+windows : >venv\dodrio\Scripts\activate.bat
+linux :
+>source venv/dodrio/bin/activate
+>pip install -r requirements.txt
 
 
 # sell to the bid
