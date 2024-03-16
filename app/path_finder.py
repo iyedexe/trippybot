@@ -1,6 +1,6 @@
 import time
 from utils import secure_get
-from fin import CoinPair, Transaction, Way
+from app.financial_objects import CoinPair, Order, Way
 
 class PathFinder:
     def __init__(self):
@@ -39,9 +39,9 @@ class PathFinder:
     #connect to exchange and get list of pairs
     def get_possible_paths(self, start_coin, inter_coin, final_coin):
         steps = [ 
-            [Transaction(CoinPair(inter_coin,start_coin), Way.BUY) , Transaction(CoinPair(start_coin,inter_coin), Way.SELL)],
-            [Transaction(CoinPair(final_coin,inter_coin), Way.BUY) , Transaction(CoinPair(inter_coin,final_coin), Way.SELL)],
-            [Transaction(CoinPair(start_coin,final_coin), Way.BUY) , Transaction(CoinPair(final_coin,start_coin), Way.SELL)]
+            [Order(CoinPair(inter_coin,start_coin), Way.BUY) , Order(CoinPair(start_coin,inter_coin), Way.SELL)],
+            [Order(CoinPair(final_coin,inter_coin), Way.BUY) , Order(CoinPair(inter_coin,final_coin), Way.SELL)],
+            [Order(CoinPair(start_coin,final_coin), Way.BUY) , Order(CoinPair(final_coin,start_coin), Way.SELL)]
         ]
         ways = [
             [steps[0][0], steps[1][0], steps[2][0]],
@@ -57,7 +57,7 @@ class PathFinder:
         return ways
             
     def is_path_real(self, path, pairs_universe):
-        path_pairs = [transaction._pair for transaction in path]
+        path_pairs = [Order._pair for Order in path]
         for pair in path_pairs:
             if pair not in pairs_universe:
                 return False

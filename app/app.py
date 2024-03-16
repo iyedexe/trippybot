@@ -1,9 +1,10 @@
 import configparser
 import multiprocessing
-from fluxer import Fluxer
-from path_finder import PathFinder
-from strat import ArbitrageStrategy
-from fin import Transaction, Way, CoinPair
+from app.feed_handler import FeedHandler
+from app.path_finder import PathFinder
+from app.strategy import ArbitrageStrategy
+from app.financial_objects import Order, Way, CoinPair
+from app.order_handler import OrderHandler
 
 
 if __name__ == '__main__':
@@ -29,11 +30,15 @@ if __name__ == '__main__':
     
     q = multiprocessing.Queue()
     path = [
-        Transaction(CoinPair("ETH", "BTC"), Way.SELL),
-        Transaction(CoinPair("BNB", "BTC"), Way.BUY),
-        Transaction(CoinPair("BNB", "ETH"), Way.SELL),
+        Order(CoinPair("ETH", "BTC"), Way.SELL),
+        Order(CoinPair("BNB", "BTC"), Way.BUY),
+        Order(CoinPair("BNB", "ETH"), Way.SELL),
     ]
     strat = ArbitrageStrategy(path, config)
-    fluxer = Fluxer(ticker_list, strat)
-    fluxer = multiprocessing.Process(name='fluxer', target=fluxer.run, args=(q,))
-    fluxer.start()
+    fh = FeedHandler(ticker_list, strat)
+    fhp = multiprocessing.Process(name='FeedHandler', target=fh.run, args=(q,))
+    fhp.start()
+    
+    oh = OrderHandler(ticker_list, strat)
+    ohp = multiprocessing.Process(name='OrderHandler', target=oh.run, args=(q,))
+    ohp.start()

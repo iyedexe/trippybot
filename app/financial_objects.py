@@ -8,6 +8,13 @@ class Way(Enum):
     def __str__(self):
         return self.name
 
+class OrderType(Enum):
+    MARKET = 0
+    LIMIT = 1
+
+    def __str__(self):
+        return self.name
+
 class CoinPair:
     def __init__(self, base_symbol, quote_symbol):
         self._base_asset = base_symbol
@@ -27,10 +34,12 @@ class CoinPair:
         return ticker.upper()
 
 
-class Transaction:
-    def __init__(self, pair: CoinPair, way:Way):
+class Order:
+    def __init__(self, pair: CoinPair, way:Way, type=None, quantity=None):
         self._pair = pair
         self._way = way
+        self._type =type
+        self._quantiy = quantity
 
     def __str__(self):
         return f"{self._way}@{self._pair}"
@@ -46,3 +55,24 @@ class Transaction:
 
     def get_ticker(self):
         return self._pair.get_ticker()
+    
+    def get_symbol(self):
+        return self._pair.get_ticker()
+    
+    def get_side(self):
+        return self._way
+
+    def get_order_type(self):
+        return self._type
+
+    def get_quantity(self):
+        return self._quantiy
+    
+class Signal:
+    def __init__(self, orders , signal_description ,theo_pnl : float):
+        self.orders = orders
+        self.signal_description = signal_description
+        self.theo_pnl = theo_pnl
+        
+    def get_orders(self):
+        return self.orders

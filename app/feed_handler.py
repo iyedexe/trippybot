@@ -1,12 +1,12 @@
 import websocket
 import json
 import multiprocessing
-from strat import ArbitrageStrategy
+from app.strategy import ArbitrageStrategy
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
 
-class Fluxer:
+class FeedHandler:
     def __init__(self, ticker_list, strat : ArbitrageStrategy):
         self.ticker_list = ticker_list
         self.data = {}
@@ -32,8 +32,9 @@ class Fluxer:
         try:            
             print(f"receiverd : {message}")
             self.store_message(message)
-            self.strat.check_opportunity(self.data)
-            # self.q.push(signal)
+            signal = self.strat.check_opportunity(self.data)
+            if signal is not None:
+                self.q.put(signal)
         except Exception as e:
             print(f"exception : {e}")
             
