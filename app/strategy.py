@@ -1,4 +1,4 @@
-from app.financial_objects import Way, Signal, OrderType
+from financial_objects import Way, Signal, OrderType
 
 FEE = 0.1
 
@@ -27,7 +27,7 @@ class ArbitrageStrategy:
                 
             signal = Signal(
                 orders = self.path,
-                signal_description = f"Arbitrage opportunity : {' && '.join(path_serial)}"
+                signal_description = f"Arbitrage opportunity : {' && '.join(path_serial)}",
                 theo_pnl = cost
             )
             signal = self.path

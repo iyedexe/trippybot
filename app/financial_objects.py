@@ -74,5 +74,11 @@ class Signal:
         self.signal_description = signal_description
         self.theo_pnl = theo_pnl
         
-    def get_orders(self):
+    def get_orders_list(self):
         return self.orders
+
+    def get_theo_pnl(self):
+        return self.theo_pnl
+    
+    def get_description(self):
+        return self.signal_description
