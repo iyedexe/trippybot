@@ -33,6 +33,11 @@ class CoinPair:
         ticker =  f"{self._base_asset}{self._quote_asset}"
         return ticker.upper()
 
+    def get_quote_currency(self):
+        return self._quote_asset
+
+    def get_base_currency(self):
+        return self._base_asset
 
 class Order:
     def __init__(self, pair: CoinPair, way:Way, type=None, quantity=None):
@@ -59,7 +64,7 @@ class Order:
     def get_symbol(self):
         return self._pair.get_ticker()
     
-    def get_side(self):
+    def get_way(self):
         return self._way
 
     def get_order_type(self):
@@ -67,7 +72,10 @@ class Order:
 
     def get_quantity(self):
         return self._quantiy
-    
+
+    def get_pair(self):
+        return self._pair
+
 class Signal:
     def __init__(self, orders , signal_description ,theo_pnl : float):
         self.orders = orders
