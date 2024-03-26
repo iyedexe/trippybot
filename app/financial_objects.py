@@ -40,7 +40,7 @@ class CoinPair:
         return self._base_asset
 
 class Order:
-    def __init__(self, pair: CoinPair, way:Way, type=None, quantity=None):
+    def __init__(self, pair: CoinPair, way:Way, type:OrderType=None, quantity=None):
         self._pair = pair
         self._way = way
         self._type =type
@@ -75,6 +75,9 @@ class Order:
 
     def get_pair(self):
         return self._pair
+
+    def getType(self):
+        return self._type
 
 class Signal:
     def __init__(self, orders , signal_description ,theo_pnl : float):

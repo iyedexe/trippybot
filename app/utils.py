@@ -3,6 +3,8 @@ import logging
 import hmac
 import hashlib
 import time
+from urllib.parse import urlencode
+from colorlog import ColoredFormatter
 import sys
 
 def secure_get(url):
@@ -28,28 +30,20 @@ def hashing(query_string, api_secret):
 def get_timestamp():
     return int(time.time() * 1000)
 
-class CustomFormatter(logging.Formatter):
-    """Logging colored formatter, adapted from https://stackoverflow.com/a/56944256/3638629"""
+def init_logger(logger_name: str='UnNamedProcess'):
+    LOG_LEVEL = logging.DEBUG
+    LOGFORMAT = "%(log_color)s%(asctime)s%(reset)s | %(log_color)s%(name)s%(reset)s | %(log_color)s%(levelname)s%(reset)s | %(message)s"
+    logging.root.setLevel(LOG_LEVEL)
+    formatter = ColoredFormatter(LOGFORMAT)
+    stream = logging.StreamHandler()
+    stream.setLevel(LOG_LEVEL)
+    stream.setFormatter(formatter)
+    log = logging.getLogger('OrderHandler')
+    log.setLevel(LOG_LEVEL)
+    log.addHandler(stream)
+    return log
 
-    grey = '\x1b[38;21m'
-    blue = '\x1b[38;5;39m'
-    yellow = '\x1b[38;5;226m'
-    red = '\x1b[38;5;196m'
-    bold_red = '\x1b[31;1m'
-    reset = '\x1b[0m'
 
-    def __init__(self):
-        super().__init__()
-        self.fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        self.FORMATS = {
-            logging.DEBUG: self.grey + self.fmt + self.reset,
-            logging.INFO: self.blue + self.fmt + self.reset,
-            logging.WARNING: self.yellow + self.fmt + self.reset,
-            logging.ERROR: self.red + self.fmt + self.reset,
-            logging.CRITICAL: self.bold_red + self.fmt + self.reset
-        }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
+def compute_signature(payload, key):
+    return hashing(urlencode(dict(sorted(payload.items()))), key)
+    

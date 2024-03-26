@@ -42,3 +42,30 @@ linux :
 # get : Y3 BNB
 
 # FinalBNB = StartingBNB * (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3
+
+
+#Important : 
+Timing security
+
+    SIGNED requests also require a timestamp parameter which should be the current millisecond timestamp.
+    An additional optional parameter, recvWindow, specifies for how long the request stays valid.
+        If recvWindow is not sent, it defaults to 5000 milliseconds.
+        Maximum recvWindow is 60000 milliseconds.
+    Request processing logic is as follows:
+
+  if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
+    // process request
+  } else {
+    // reject request
+  }
+
+Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With recvWindow, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server.
+
+It is recommended to use a small recvWindow of 5000 or less!
+
+#
+Base Currency
+The base currency is the first currency listed in a currency pair. It is the currency that is being bought or sold. For example, in the EUR/USD currency pair, the euro (EUR) is the base currency.
+
+Quote Currency
+The quote currency is the second currency listed in a currency pair. It is used to determine the value of the 
