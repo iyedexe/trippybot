@@ -38,7 +38,7 @@ def init_logger(logger_name: str='UnNamedProcess'):
     stream = logging.StreamHandler()
     stream.setLevel(LOG_LEVEL)
     stream.setFormatter(formatter)
-    log = logging.getLogger('OrderHandler')
+    log = logging.getLogger(logger_name)
     log.setLevel(LOG_LEVEL)
     log.addHandler(stream)
     return log

@@ -1,22 +1,24 @@
 import websocket
 import json
 import multiprocessing
-from app.strategy import ArbitrageStrategy
+from strategy import ArbitrageStrategy
+from utils import init_logger
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
+log = init_logger('FeedHandler')
 
 class FeedHandler:
-    def __init__(self, ticker_list, strat : ArbitrageStrategy):
+    def __init__(self, config, ticker_list):
+        self._config = config
+        market_connection = config['FEED_HANDLER']['market_connection']
+        self._websocket_endpoint = config[market_connection]['websocket_endpoint']
+
         self.ticker_list = ticker_list
         self.data = {}
-        self.strat = strat
-        
-        subscription_list =  [f"{ticker.lower()}@bookTicker" for ticker in ticker_list]
-        self.binance_socket = f"wss://stream.binance.com:9443/stream?streams={'/'.join(subscription_list)}"
   
     def on_open(self, wsapp):
-        print("connection open")
+        log.info("connection open")
 
     def store_message(self, message):
         dict_message = json.loads(message)
@@ -30,31 +32,32 @@ class FeedHandler:
 
     def on_message(self, wsapp, message):
         try:            
-            print(f"receiverd : {message}")
+            # log.debug(f"receiverd frame : {message}")
             self.store_message(message)
             signal = self.strat.check_opportunity(self.data)
             if signal is not None:
                 self.q.put(signal)
         except Exception as e:
-            print(f"exception : {e}")
+            log.exception(f"exception : {e}")
             
     def on_error(wsapp, error):
-        print(error)
+        log.info(error)
 
     def on_close(self, wsapp, close_status_code, close_msg):
-        print("Connection close")
-        print(close_status_code)
-        print(close_msg)
+        log.info("Connection close")
+        log.info(close_status_code)
+        log.info(close_msg)
 
     def on_ping(self, wsapp, message):
-        print("received ping from server")
+        log.info("received ping from server")
 
     def on_pong(self, wsapp, message):
-        print("received pong from server")
+        log.info("received pong from server")
 
-    def run(self, q: multiprocessing.Queue):
+    def run(self, q: multiprocessing.Queue, strat : ArbitrageStrategy):
         self.q = q
-        wsapp = websocket.WebSocketApp(self.binance_socket,
+        self.strat = strat
+        wsapp = websocket.WebSocketApp(f"{self._websocket_endpoint}/stream?streams={'/'.join([f'{ticker.lower()}@bookTicker' for ticker in self.ticker_list])}",
                                         on_message=self.on_message,
                                         on_open=self.on_open,
                                         on_error=self.on_error,
