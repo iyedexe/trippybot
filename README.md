@@ -8,28 +8,28 @@ when we say we SELL(->) a PAIR USD/EUR we are selling the base, ie USD and buyin
 ==> we are spending USD  
 
 this resulted in the choice where   
-    - buy orders are sized in quote currency  
-    - sell orders are sized in base currency  
-    
+    - **buy orders are sized in quote currency** 
+    - **sell orders are sized in base currency**  
+
 ## Strategy profitability evaluation:
-Follow the simple example of the cycle based on BNB, BTC and ETH in that order :
+Follow the simple example of the cycle based on BNB, BTC and ETH in that order :  
 
-BNB -> BTC -> ETH -> BNB            
-a possible path is :
-SELL BNB/BTC
-    - unitary cost : 1 BNB * (100 - Fee1%)/100
-    - get : Y1 BTC
-BUY ETH/BTC
-    - unitairy cost : 1 BTC * Fee2%
-    - get : 1/X2 ETH
-SELL ETH/BNB
-    - unitairy cost : 1 ETH * Fee3%
-    - get : Y3 BNB
+BNB -> BTC -> ETH -> BNB              
+a possible path is :  
+SELL BNB/BTC  
+    - unitary cost : 1 BNB * (100 - Fee1%)/100  
+    - get : Y1 BTC  
+BUY ETH/BTC  
+    - unitairy cost : 1 BTC * Fee2%  
+    - get : 1/X2 ETH  
+SELL ETH/BNB  
+    - unitairy cost : 1 ETH * Fee3%  
+    - get : Y3 BNB  
 
-==> FinalBNB = StartingBNB * (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3
-r is the profitabilty of a cycle :
-r = (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3
-money is made if r>1
+==> FinalBNB = StartingBNB * (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3  
+r is the profitabilty of a cycle :  
+**r = (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3**  
+money is made if r>1  
 
 # References :
 use : 
