@@ -2,15 +2,15 @@
 # Implementation choices :
 
 ## Order size:
-when we say we BUY(<-) a PAIR USD/EUR we are buying the base, ie USD and selling the quote, ie EUR.
-==> we are spending EUR
-when we say we SELL(->) a PAIR USD/EUR we are selling the base, ie USD and buying the quote, ie EUR.
-==> we are spending USD
+when we say we BUY(<-) a PAIR USD/EUR we are buying the base, ie USD and selling the quote, ie EUR.  
+==> we are spending EUR.  
+when we say we SELL(->) a PAIR USD/EUR we are selling the base, ie USD and buying the quote, ie EUR.  
+==> we are spending USD  
 
-this resulted in the choice where 
-    - buy orders are sized in quote currency
-    - sell orders are sized in base currency
-
+this resulted in the choice where   
+    - buy orders are sized in quote currency  
+    - sell orders are sized in base currency  
+    
 ## Strategy profitability evaluation:
 Follow the simple example of the cycle based on BNB, BTC and ETH in that order :
 
@@ -61,11 +61,11 @@ linux :
 ## Binance server time sync : 
 Timing security
 
-    SIGNED requests also require a timestamp parameter which should be the current millisecond timestamp.
-    An additional optional parameter, recvWindow, specifies for how long the request stays valid.
-        If recvWindow is not sent, it defaults to 5000 milliseconds.
-        Maximum recvWindow is 60000 milliseconds.
-    Request processing logic is as follows:
+SIGNED requests also require a timestamp parameter which should be the current millisecond timestamp.
+An additional optional parameter, recvWindow, specifies for how long the request stays valid.
+    If recvWindow is not sent, it defaults to 5000 milliseconds.
+    Maximum recvWindow is 60000 milliseconds.
+Request processing logic is as follows:
 
   if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
     // process request
