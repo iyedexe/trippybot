@@ -56,6 +56,7 @@ windows : >venv\dodrio\Scripts\activate.bat
 linux :
 >source venv/dodrio/bin/activate
 >pip install -r requirements.txt
+cd Desktop\workbench\TriangularArbitragePyBot && venv\dodrio\Scripts\activate.bat
 
 # General doc
 ## Binance server time sync : 

@@ -1,11 +1,12 @@
+import signal
 import websocket
 import json
 import multiprocessing
-from strategy import ArbitrageStrategy
-from utils import init_logger
+from utils import init_logger, signal_handler
 
 # If you like to run in debug mode
 websocket.enableTrace(False)
+signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('FeedHandler')
 
 class FeedHandler:
@@ -18,7 +19,7 @@ class FeedHandler:
         self.data = {}
   
     def on_open(self, wsapp):
-        log.info("connection open")
+        log.info("WS connection opened ..")
 
     def store_message(self, message):
         dict_message = json.loads(message)
@@ -34,11 +35,10 @@ class FeedHandler:
         try:            
             # log.debug(f"receiverd frame : {message}")
             self.store_message(message)
-            signal = self.strat.check_opportunity(self.data)
-            if signal is not None:
-                self.q.put(signal)
+            self.q.put(self.data)
         except Exception as e:
-            log.exception(f"exception : {e}")
+            log.error(f"Exception on message : {message}")
+            log.exception(f"{e}")
             
     def on_error(wsapp, error):
         log.info(error)
@@ -54,9 +54,9 @@ class FeedHandler:
     def on_pong(self, wsapp, message):
         log.info("received pong from server")
 
-    def run(self, q: multiprocessing.Queue, strat : ArbitrageStrategy):
+    def run(self, q: multiprocessing.Queue):
         self.q = q
-        self.strat = strat
+        log.info('Feed handler running ..')
         wsapp = websocket.WebSocketApp(f"{self._websocket_endpoint}/stream?streams={'/'.join([f'{ticker.lower()}@bookTicker' for ticker in self.ticker_list])}",
                                         on_message=self.on_message,
                                         on_open=self.on_open,

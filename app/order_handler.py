@@ -9,18 +9,12 @@ import configparser
 import time
 from collections import defaultdict 
 from financial_objects import Order, Signal, Way, CoinPair, OrderType
-from utils import get_timestamp, signal_handler, init_logger, compute_signature
+from utils import get_timestamp, signal_handler, init_logger, compute_signature, TelegramSender
 from strategy import ArbitrageStrategy
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('OrderHandler')
 STATUS_OK=200
-
-    # def send_message(self, message):
-    #     if self._bot is None:
-    #         self._bot = telegram.Bot(token=self._telegram_api_key)
-
-    #     asyncio.run(self._bot.send_message(chat_id=self._telegram_user_id, text=message))      
 
 class OrderController:
     def __init__(self):
@@ -38,7 +32,7 @@ class OrderController:
                     self.min_size[symbol] = float(filter_obj['minQty'])
                     self.max_size[symbol] = float(filter_obj['maxQty'])
 
-    def set_size(self, order :Order):
+    def control_size(self, order :Order):
         symbol = order.get_symbol()
         qty = order.get_quantity()
                 
@@ -49,10 +43,10 @@ class OrderController:
         if self.max_size[symbol] !=0 and qty > self.max_size[symbol]:
             qty = self.max_size[symbol]
             
-        order._quantiy = qty
+        order.set_quantity(qty)
         
 class OrderHandler:
-    def __init__(self, config):
+    def __init__(self, config, strat : ArbitrageStrategy):
         self._config = config
         market_connection = config['ORDER_HANDLER']['market_connection']
 
@@ -62,9 +56,8 @@ class OrderHandler:
         self.balance = defaultdict(float)
         self.dry_run = config['ORDER_HANDLER'].getboolean('dry_run', True)
         self.order_controller = OrderController()
-
-        # self._telegram_api_key = config['TELEGRAM']['api_key']
-        # self._telegram_user_id = config['TELEGRAM']['user_id']
+        self.telegram_sender = TelegramSender(config)
+        self.strat = strat
 
     async def listen_socket(self):
         wsMessage = await self.ws.receive()
@@ -100,31 +93,18 @@ class OrderHandler:
         try:
             orders_list = signal.get_orders_list()
             log.info(f"Signal received:")
-            log.info(f"Theo unitairy pnl = [{signal.get_theo_pnl()}]")
+            log.info(f"Theo unitairy pnl = [{signal.get_theo_pnl()}%]")
             log.info(f"Description = [{signal.get_description()}]")
-
+            self.telegram_sender.send_message(f"Signal received: \n\n Theo unitairy pnl = [{signal.get_theo_pnl()}%] \n\n Description = [{signal.get_description()}]")
             for order in orders_list:
-
-                # pair = order.get_pair()
-                # if order.get_way() == Way.BUY:
-                #     starting_coin = pair.get_quote_currency()
-                # elif order.get_way() == Way.SELL:
-                #     starting_coin = pair.get_base_currency()
                 
-                
-                # if order.get_quantity() == 0:
-                #     order._quantity = self.balance[starting_coin]
-                
-                self.order_controller.set_size(order)
+                self.order_controller.control_size(order)
                 await self.execute_order(order)
 
                 log.info(f'Finished executing order')
         except Exception as e:
             log.critical('An exception occured during signal processing')
-            log.exception(e)
-            exit(1)
-    
-
+            log.exception(e)  
 
     async def get_balances(self):
         message_id = await self.send_command(self.get_account_status_command)
@@ -137,8 +117,8 @@ class OrderHandler:
                 log.debug(f'Current balance of [{asset_balance_obj["asset"]}] == [{asset_balance_obj["free"]}]')
     
     async def execute_order(self, order:Order):
-        if order.getType() != OrderType.MARKET:
-            log.error(f'Unhandled order type : {order.getType()}')
+        if order.get_type() != OrderType.MARKET:
+            log.error(f'Unhandled order type : {order.get_type()}')
         log.info(f'Sending market order way=[{order.get_way()}] symbol=[{order.get_symbol()}] qty=[{order.get_quantity()}]')
         if self.dry_run == True:
             return
@@ -179,12 +159,18 @@ class OrderHandler:
         log.warning(f'getting in place order command')
         
         timestamp = get_timestamp()
+        #see implementation choice #1
+        if order.get_way() == Way.SELL:
+            quantity_key = "quantity"
+        elif order.get_way() == Way.BUY:
+            quantity_key = "quoteOrderQty"
+
         payload = {
             "apiKey": self._binance_api_key,
-            "quantity": f"{order.get_quantity():.8f}",
+            quantity_key: f"{order.get_quantity():.8f}",
             "side": str(order.get_way()),
             "symbol": order.get_symbol(),
-            "type": str(order.get_order_type()),
+            "type": str(order.get_type()),
             "timestamp": timestamp,
             "newOrderRespType": "RESULT",
         }
@@ -201,19 +187,29 @@ class OrderHandler:
     async def on_open(self):
         log.info('WS connection opened ..')
         await self.init_lot_sizes()
+        log.info(f'Initializing portfolio, getting coin balances')
+        await self.get_balances()
+        self.strat.reset_balance(self.balance)
+        self.telegram_sender.send_message(f"Running Strategy, order handler started!")
+        log.info(f'Init done, starting market data listen')
+
         while True:
+
+            data = self.q.get()
+            signal = self.strat.check_opportunity(data)
+            # log.info(f'New market data incoming :[{data}]')
+            
+            if signal is None:
+                continue
+
+            log.info('Caught new signal ..')
+            await self.process_signal(signal)
             log.info(f'Reinitializing portfolio, getting coin balances')
             await self.get_balances()
             self.strat.reset_balance(self.balance)
-            log.info('Listening to signals queue ..')
-            signal = self.q.get()
-            log.info('Caught new signal ..')
-            if signal is None:
-                break
-            await self.process_signal(signal)
+
             
-    async def run_(self, q :multiprocessing.Queue, strat : ArbitrageStrategy):
-        self.strat = strat
+    async def run_(self, q :multiprocessing.Queue):
         self.q = q
         log.info('Order handler running ..')
         async with aiohttp.ClientSession() as session:
@@ -221,8 +217,8 @@ class OrderHandler:
                 self.ws = ws
                 await self.on_open()
 
-    def run(self, q :multiprocessing.Queue, strat : ArbitrageStrategy):
-        asyncio.run(self.run_(q, strat))
+    def run(self, q :multiprocessing.Queue):
+        asyncio.run(self.run_(q))
         
 
 def main():

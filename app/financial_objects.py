@@ -29,7 +29,7 @@ class CoinPair:
     def __eq__(self, other):
         return self._base_asset == other._base_asset and self._quote_asset == other._quote_asset
     
-    def get_ticker(self):
+    def get_symbol(self):
         ticker =  f"{self._base_asset}{self._quote_asset}"
         return ticker.upper()
 
@@ -40,11 +40,12 @@ class CoinPair:
         return self._base_asset
 
 class Order:
-    def __init__(self, pair: CoinPair, way:Way, type:OrderType=None, quantity=None):
+    def __init__(self, pair: CoinPair, way:Way, type:OrderType=None, quantity=None, price=None):
         self._pair = pair
         self._way = way
         self._type =type
-        self._quantiy = quantity
+        self._quantity = quantity
+        self._price = price
 
     def __str__(self):
         return f"{self._way}@{self._pair}"
@@ -57,28 +58,31 @@ class Order:
             return "a" 
         if self._way == Way.SELL:
             return "b" 
-
-    def get_ticker(self):
-        return self._pair.get_ticker()
     
     def get_symbol(self):
-        return self._pair.get_ticker()
+        return self._pair.get_symbol()
     
     def get_way(self):
         return self._way
 
-    def get_order_type(self):
-        return self._type
-
     def get_quantity(self):
-        return self._quantiy
+        return self._quantity
+    def set_quantity(self, value):
+        self._quantity = value
 
     def get_pair(self):
         return self._pair
 
-    def getType(self):
+    def get_type(self):
         return self._type
+    def set_type(self, value):
+        self._type = value
 
+    def get_price(self):
+        return self._price
+    def set_price(self, value):
+        self._price = value
+        
 class Signal:
     def __init__(self, orders , signal_description ,theo_pnl : float):
         self.orders = orders

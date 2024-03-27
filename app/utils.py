@@ -1,4 +1,6 @@
 import requests
+import telegram
+import asyncio
 import logging
 import hmac
 import hashlib
@@ -6,6 +8,21 @@ import time
 from urllib.parse import urlencode
 from colorlog import ColoredFormatter
 import sys
+
+
+class TelegramSender:
+    def __init__(self, config):
+        self.config = config
+        self._telegram_api_key = config['TELEGRAM']['api_key']
+        self._telegram_user_id = config['TELEGRAM']['user_id']
+        self._bot = None
+        
+    def send_message(self, message):
+        if self._bot is None:
+            self._bot = telegram.Bot(token=self._telegram_api_key)
+        asyncio.create_task(self._bot.send_message(chat_id=self._telegram_user_id, text=message))
+        # await self._bot.send_message(chat_id=self._telegram_user_id, text=message)
+              
 
 def secure_get(url):
     try:
