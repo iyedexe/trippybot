@@ -39,7 +39,7 @@ as per this awesome work : https://docs.google.com/spreadsheets/d/1W345Qgp1QdcKd
 |				0.424			   |                    0.16	        |         0.268	            |       0.269         |         0.075          |         0.072          |           0.206             |        0.023          |
 
 Each value is the round trip latency in seconds for a REST fetch_ticker() call via the Python ccxt library (average of 10 serial iterations) from the specified server location. 			
-
+the lowest latency is if the app is hosted on aws Tokyo. (ap-northeast-1)
 # References :
 use : 
 ## client webstream implementation:
