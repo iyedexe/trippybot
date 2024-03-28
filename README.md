@@ -1,4 +1,4 @@
-# Next steps :
+# TODO :
 * Within OrderHandler/strategy compute path(s), so strategy gets exchange info as input, making it fully transparent for orderhandler
 * Make critical the signal process function, and when back to data processing, aggregate updates
 * App deployment in AWS Tokyo region, automatic restart daily, file logging    
