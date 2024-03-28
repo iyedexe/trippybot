@@ -17,11 +17,11 @@ class TelegramSender:
         self._telegram_user_id = config['TELEGRAM']['user_id']
         self._bot = None
         
-    def send_message(self, message):
+    async def send_message(self, message):
         if self._bot is None:
             self._bot = telegram.Bot(token=self._telegram_api_key)
-        asyncio.create_task(self._bot.send_message(chat_id=self._telegram_user_id, text=message))
-        # await self._bot.send_message(chat_id=self._telegram_user_id, text=message)
+        
+            await self._bot.send_message(chat_id=self._telegram_user_id, text=message)
               
 
 def secure_get(url):
