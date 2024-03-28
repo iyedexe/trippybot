@@ -55,17 +55,22 @@ https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-p
 https://www.thealgorists.com/Algo/ShortestPaths/Arbitrage
 
 ## APIs used :
-https://docs.aiohttp.org/en/stable/client_reference.html
-https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event
-https://binance-docs.github.io/apidocs/websocket_api/en/#signed-request-example-rsa
+OIHTTP for async WS :   
+    https://docs.aiohttp.org/en/stable/client_reference.html    
+ASYNCIO for general async:
+    https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event     
+BINANCE WebSockets API:   
+    https://binance-docs.github.io/apidocs/websocket_api/en/#signed-request-example-rsa   
+BINANCE Streams Websockets API:
+    https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md    
 
 # How to setup :
->python -m venv dodrio
-windows : >venv\dodrio\Scripts\activate.bat
-linux :
->source venv/dodrio/bin/activate
->pip install -r requirements.txt
-cd Desktop\workbench\TriangularArbitragePyBot && venv\dodrio\Scripts\activate.bat
+    >python -m venv venv       
+    windows :  
+    >venv\Scripts\activate.bat  
+    linux :    
+    >source venv/bin/activate   
+    >pip install -r requirements.txt   
 
 # General doc
 ## Binance server time sync : 
