@@ -4,6 +4,7 @@ Multiple path arbitrage starting from one initial coin
 App monitoring via graphana:    
     - technical metrics on process health, network traffic, server cpu and mem    
     - functional metrics on current balance, list of trades, PNL per trade and global    
+Add strategy backtesting method into framework
 
 # Implementation choices :
 
