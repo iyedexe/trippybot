@@ -41,28 +41,24 @@ as per this awesome work : https://docs.google.com/spreadsheets/d/1W345Qgp1QdcKd
 Each value is the round trip latency in seconds for a REST fetch_ticker() call via the Python ccxt library (average of 10 serial iterations) from the specified server location. 			
 the lowest latency is if the app is hosted on aws Tokyo. (ap-northeast-1)
 # References :
-use : 
-## client webstream implementation:
-https://github.com/binance/binance-signature-examples/blob/master/python/websocket-api/websocket_api_client.py
 
-## ws content:
-https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+## APIs used :   
+OIHTTP for async WS :      
+    https://docs.aiohttp.org/en/stable/client_reference.html       
+ASYNCIO for general async:   
+    https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event        
+BINANCE WebSockets API:      
+    https://binance-docs.github.io/apidocs/websocket_api/en/#signed-request-example-rsa      
+BINANCE Streams Websockets API:   
+    https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md       
 
-## good inspiration:
-https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-postgresql-db-5fnd
-
-## potential improvement:
-https://www.thealgorists.com/Algo/ShortestPaths/Arbitrage
-
-## APIs used :
-OIHTTP for async WS :   
-    https://docs.aiohttp.org/en/stable/client_reference.html    
-ASYNCIO for general async:
-    https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event     
-BINANCE WebSockets API:   
-    https://binance-docs.github.io/apidocs/websocket_api/en/#signed-request-example-rsa   
-BINANCE Streams Websockets API:
-    https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md    
+## Inspiration:        
+### client webstream implementation:    
+https://github.com/binance/binance-signature-examples/blob/master/python/websocket-api/websocket_api_client.py    
+### good inspiration:
+https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-postgresql-db-5fnd    
+### potential improvement:
+https://www.thealgorists.com/Algo/ShortestPaths/Arbitrage    
 
 # How to setup :
     >python -m venv venv       
@@ -71,54 +67,3 @@ BINANCE Streams Websockets API:
     linux :    
     >source venv/bin/activate   
     >pip install -r requirements.txt   
-
-# General doc
-## Binance server time sync : 
-Timing security
-
-SIGNED requests also require a timestamp parameter which should be the current millisecond timestamp.
-An additional optional parameter, recvWindow, specifies for how long the request stays valid.
-    If recvWindow is not sent, it defaults to 5000 milliseconds.
-    Maximum recvWindow is 60000 milliseconds.
-Request processing logic is as follows:
-
-  if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
-    // process request
-  } else {
-    // reject request
-  }
-
-Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With recvWindow, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server.
-
-It is recommended to use a small recvWindow of 5000 or less!
-
-## Binance LOT SIZE
-LOT_SIZE
-
-    ExchangeInfo format:
-
-  {
-    "filterType": "LOT_SIZE",
-    "minQty": "0.00100000",
-    "maxQty": "100000.00000000",
-    "stepSize": "0.00100000"
-  }
-
-The LOT_SIZE filter defines the quantity (aka "lots" in auction terms) rules for a symbol. There are 3 parts:
-
-    minQty defines the minimum quantity/icebergQty allowed.
-    maxQty defines the maximum quantity/icebergQty allowed.
-    stepSize defines the intervals that a quantity/icebergQty can be increased/decreased by.
-
-In order to pass the lot size, the following must be true for quantity/icebergQty:
-
-    quantity >= minQty
-    quantity <= maxQty
-    quantity % stepSize == 0
-
-# FX Pairs
-Base Currency
-The base currency is the first currency listed in a currency pair. It is the currency that is being bought or sold. For example, in the EUR/USD currency pair, the euro (EUR) is the base currency.
-
-Quote Currency
-The quote currency is the second currency listed in a currency pair. It is used to determine the value of the 
