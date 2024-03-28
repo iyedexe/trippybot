@@ -1,4 +1,3 @@
-![image](https://github.com/iyedexe/TriangularArbitragePyBot/assets/12675313/29454c73-4c40-4d6b-89fe-ab12d76fa399)# TriangularArbitragePyBot
 # Implementation choices :
 
 ## Order size:
