@@ -1,10 +1,12 @@
 # Next steps :
-App deployment in AWS Tokyo region, automatic restart daily, file logging    
-Multiple path arbitrage starting from one initial coin     
-App monitoring via graphana:    
+* Within OrderHandler/strategy compute path(s), so strategy gets exchange info as input, making it fully transparent for orderhandler
+* Make critical the signal process function, and when back to data processing, aggregate updates
+* App deployment in AWS Tokyo region, automatic restart daily, file logging    
+* Multiple path arbitrage starting from one initial coin     
+* App monitoring via graphana:    
     - technical metrics on process health, network traffic, server cpu and mem    
     - functional metrics on current balance, list of trades, PNL per trade and global    
-Add strategy backtesting method into framework
+* Add strategy backtesting method into framework
 
 # Implementation choices :
 
