@@ -1,4 +1,4 @@
-# TriangularArbitragePyBot
+![image](https://github.com/iyedexe/TriangularArbitragePyBot/assets/12675313/29454c73-4c40-4d6b-89fe-ab12d76fa399)# TriangularArbitragePyBot
 # Implementation choices :
 
 ## Order size:
@@ -30,6 +30,16 @@ SELL ETH/BNB
 r is the profitabilty of a cycle :  
 **r = (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3**    
 **Startegy is profitable is made if r>1**       
+
+# Infra
+After some research and experimentation, latency can be critical in such strategy and any way to minimize it is welcome.   
+as per this awesome work : https://docs.google.com/spreadsheets/d/1W345Qgp1QdcKdyg_hRkzl79OTkGVtxMJJZnJGjtdSp4/edit#gid=0  
+
+| US East N. Virginia (us-east-1)  | US West N. California (us-west-1)  | Frankfurt (eu-central-1)  | London (eu-west-1)  |  Hong Kong (ap-east-1) | Seoul (ap-northeast-2) | Singapore (ap-southeast-1)  | Tokyo (ap-northeast-1)|
+|----------------------------------|------------------------------------|---------------------------|---------------------|------------------------|------------------------|-----------------------------|-----------------------|
+|				0.424			   |                    0.16	        |         0.268	            |       0.269         |         0.075          |         0.072          |           0.206             |        0.023          |
+
+Each value is the round trip latency in seconds for a REST fetch_ticker() call via the Python ccxt library (average of 10 serial iterations) from the specified server location. 			
 
 # References :
 use : 
