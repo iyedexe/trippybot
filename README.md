@@ -1,12 +1,19 @@
 # TODO :
 * Within OrderHandler/strategy compute path(s), so strategy gets exchange info as input, making it fully transparent for orderhandler
 * Make critical the signal process function, and when back to data processing, aggregate updates
+* FeedHandler in AIOHTTP async
 * App deployment in AWS Tokyo region, automatic restart daily, file logging    
 * Multiple path arbitrage starting from one initial coin     
 * App monitoring via graphana:    
     - technical metrics on process health, network traffic, server cpu and mem    
     - functional metrics on current balance, list of trades, PNL per trade and global    
 * Add strategy backtesting method into framework
+* Make code generic and working for different exchnage brokers
+* Use framework for different strategies
+    - Basic Cross exchange arbitrage (could be beneficial)
+    - BellmanFord path finder arbitrage (for the maths)
+    - Triangular cross exchange arbitrage (very promising)
+ 
 
 # Implementation choices :
 
