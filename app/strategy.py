@@ -76,13 +76,20 @@ class ArbitrageStrategy:
     def reset_balance(self, val):
         self.balance = val
     
-    def evaluate_path(self, path, data):
+    def evaluate_path(self, path: List[Order], data):
+        signal_desc = []
+
         initial_order = path[0]
         
-        available_amount = RISK * self.balance[initial_order.get_initial()]
-        cost = 1
-        signal_desc = []
+        initial_amount = RISK * self.balance[initial_order.get_initial()]
+        order_pair = initial_order.get_pair()    
+        initial_amount = order_pair.validate_quantity(initial_amount)
+        available_amount = initial_amount
         
+        if available_amount == 0:
+            log.error(f"Cannot price strategy, available amount is null on [{initial_order.get_symbol()}]")
+            return 0, ""
+
         for order in path:
             symbol_prices = data.get(order.get_symbol()) 
             if symbol_prices is None:
@@ -95,22 +102,24 @@ class ArbitrageStrategy:
             if order.get_way() == Way.SELL:
                 bid = float(symbol_prices.get("b"))
                 order.set_price(bid)
-                cost *= bid
                 available_amount *= bid
                 
             elif order.get_way() == Way.BUY:
                 ask = float(symbol_prices.get("a"))
                 order.set_price(ask)
-                cost *= (1/ask)
                 available_amount *= (1/ask)
+                
+            order_pair = order.get_pair()    
+            available_amount = order_pair.validate_quantity(available_amount)
+
     
             order_desc = f'symbol=[{order.get_symbol()}], way=[{order.get_way()}] price=[{order.get_price()}], quantity=[{order.get_quantity()}]' 
             signal_desc.append(order_desc)
-                            
+        
+        cost = available_amount - initial_amount
         signal_desc_str = f"Arbitrage opportunity : {' && '.join(signal_desc)}"
-        fees = 1.4
-        # fees = pow(1 - FEE/100, 3)
-        cost *= fees
+        log.info(f"Signal cost: {cost} starting amount=[{initial_amount}], final amount=[{available_amount}]")
+
         return cost, signal_desc_str
         
     def check_opportunity(self, data: Dict):

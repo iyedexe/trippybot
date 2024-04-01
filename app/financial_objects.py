@@ -14,6 +14,8 @@ class OrderType(Enum):
 
     def __str__(self):
         return self.name
+    
+INFINTY = 10e7
 
 class CoinPair:
     def __init__(self, base, quote, symbol=None):
@@ -23,6 +25,9 @@ class CoinPair:
             self.symbol = f"{self._base_asset}{self._quote_asset}"
         else:
             self.symbol = symbol
+        self.min_size = None
+        self.lot_size = None
+        self.max_size = None
 
     def get_symbol(self):
         return self.symbol
@@ -32,6 +37,36 @@ class CoinPair:
 
     def get_base(self):
         return self._base_asset
+
+    def get_lot_size(self):
+        return self.lot_size
+    
+    def set_lot_size(self, value :float): 
+        if (self.lot_size is None) or (value>self.lot_size):
+            self.lot_size = value
+    
+    def get_min_size(self):
+        return self.min_size
+            
+    def set_min_size(self, value :float): 
+        if (self.min_size is None) or (value>self.min_size):
+            self.min_size = value
+
+    def get_max_size(self):
+        return self.max_size
+    
+    def set_max_size(self, value :float): 
+        if (self.max_size is None) or (value<self.lot_size):
+            self.max_size = value
+            
+    def validate_quantity(self, quantity):
+        if self.lot_size !=0 and (quantity % self.lot_size) != 0:
+            quantity = int(quantity/self.lot_size) * self.lot_size
+        if self.min_size !=0 and quantity < self.min_size:
+            quantity = self.min_size
+        if self.max_size !=0 and quantity > self.max_size:
+            quantity = self.max_size
+        return quantity
             
     def __str__(self):
         return f"{self._base_asset}/{self._quote_asset}"

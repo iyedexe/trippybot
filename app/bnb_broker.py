@@ -150,10 +150,24 @@ class BNBBroker:
     async def get_symbols(self):
         log.info('Getting exchange info')
         exchange_info = await self.ws_client.execute_command(self.commands.get_exchange_info_command)
-        symbols = [CoinPair(
-            json_symbol['baseAsset'], 
-            json_symbol['quoteAsset'], 
-            json_symbol['symbol']
-                    )
-            for json_symbol in exchange_info['symbols'] if json_symbol['status']=='TRADING']
+        symbols = [] 
+        for json_symbol in exchange_info['symbols']:
+            if json_symbol['status']=='TRADING':
+                symbol = CoinPair(
+                            json_symbol['baseAsset'], 
+                            json_symbol['quoteAsset'], 
+                            json_symbol['symbol']
+                        )
+                for json_filter in json_symbol['filters']:
+                    if json_filter['filterType'] == 'LOT_SIZE':
+                        symbol.set_lot_size(float(json_filter['stepSize'])) 
+                        symbol.set_min_size(float(json_filter['minQty']))
+                        symbol.set_max_size(float(json_filter['maxQty']))     
+                    if json_filter['filterType'] == 'MARKET_LOT_SIZE':
+                        symbol.set_lot_size(float(json_filter['stepSize'])) 
+                        symbol.set_min_size(float(json_filter['minQty']))
+                        symbol.set_max_size(float(json_filter['maxQty']))     
+                            
+                symbols.append(symbol) 
+        # symbols = [
         return symbols
