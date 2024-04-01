@@ -10,12 +10,12 @@ signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('FeedHandler')
 
 class FeedHandler:
-    def __init__(self, config, ticker_list):
+    def __init__(self, config, symbol_list):
         self._config = config
         market_connection = config['FEED_HANDLER']['market_connection']
         self._websocket_endpoint = config[market_connection]['websocket_endpoint']
 
-        self.ticker_list = ticker_list
+        self.symbol_list = symbol_list
         self.data = {}
   
     def on_open(self, wsapp):
@@ -26,10 +26,10 @@ class FeedHandler:
         data = dict_message.get("data")
         if data is None:
             return
-        ticker = data.get("s")
-        if ticker is None or ticker not in self.ticker_list:
+        symbol = data.get("s")
+        if symbol is None or symbol not in self.symbol_list:
             return
-        self.data[ticker] = data
+        self.data[symbol] = data
 
     def on_message(self, wsapp, message):
         try:            
@@ -57,7 +57,9 @@ class FeedHandler:
     def run(self, q: multiprocessing.Queue):
         self.q = q
         log.info('Feed handler running ..')
-        wsapp = websocket.WebSocketApp(f"{self._websocket_endpoint}/stream?streams={'/'.join([f'{ticker.lower()}@bookTicker' for ticker in self.ticker_list])}",
+        subscription_subject = '/'.join([f"{symbol.lower()}@bookTicker" for symbol in self.symbol_list])
+        log.info(f"Subscribing to streams : {subscription_subject}")
+        wsapp = websocket.WebSocketApp(f"{self._websocket_endpoint}/stream?streams={subscription_subject}",
                                         on_message=self.on_message,
                                         on_open=self.on_open,
                                         on_error=self.on_error,

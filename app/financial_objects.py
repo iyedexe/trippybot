@@ -16,10 +16,23 @@ class OrderType(Enum):
         return self.name
 
 class CoinPair:
-    def __init__(self, base_symbol, quote_symbol):
-        self._base_asset = base_symbol
-        self._quote_asset = quote_symbol
-    
+    def __init__(self, base, quote, symbol=None):
+        self._base_asset = base
+        self._quote_asset = quote
+        if symbol is None:
+            self.symbol = f"{self._base_asset}{self._quote_asset}"
+        else:
+            self.symbol = symbol
+
+    def get_symbol(self):
+        return self.symbol
+
+    def get_quote(self):
+        return self._quote_asset
+
+    def get_base(self):
+        return self._base_asset
+            
     def __str__(self):
         return f"{self._base_asset}/{self._quote_asset}"
 
@@ -29,15 +42,6 @@ class CoinPair:
     def __eq__(self, other):
         return self._base_asset == other._base_asset and self._quote_asset == other._quote_asset
     
-    def get_symbol(self):
-        ticker =  f"{self._base_asset}{self._quote_asset}"
-        return ticker.upper()
-
-    def get_quote_currency(self):
-        return self._quote_asset
-
-    def get_base_currency(self):
-        return self._base_asset
 
 class Order:
     def __init__(self, pair: CoinPair, way:Way, type:OrderType=None, quantity=None, price=None):
@@ -73,6 +77,22 @@ class Order:
     def get_pair(self):
         return self._pair
 
+    def get_target(self):
+        if self._way == Way.SELL:
+            return self._pair.get_quote()
+        elif self._way == Way.BUY:
+            return self._pair.get_base()
+        else:
+            return None
+
+    def get_initial(self):
+        if self._way == Way.SELL:
+            return self._pair.get_base()
+        elif self._way == Way.BUY:
+            return self._pair.get_quote()
+        else:
+            return None
+        
     def get_type(self):
         return self._type
     def set_type(self, value):
