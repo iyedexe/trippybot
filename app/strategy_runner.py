@@ -36,9 +36,9 @@ class StrategyRunner(AsyncMixin):
         try:
             orders_list = signal.get_orders_list()
             log.info(f"Signal received:")
-            log.info(f"Theo unitairy pnl = [{signal.get_theo_pnl()}%]")
+            log.info(f"Theo pnl = [{signal.get_theo_pnl()}]")
             log.info(f"Description = [{signal.get_description()}]")
-            await self.telegram_sender.send_message(f"Signal received: \n\n Theo unitairy pnl = [{signal.get_theo_pnl()}%] \n\n Description = [{signal.get_description()}]")
+            await self.telegram_sender.send_message(f"Signal received: \n\n Theo pnl = [{signal.get_theo_pnl()}] \n\n Description = [{signal.get_description()}]")
             for order in orders_list:
                 
                 # self.order_controller.control_size(order)

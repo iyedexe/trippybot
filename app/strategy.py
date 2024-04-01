@@ -59,15 +59,18 @@ class ArbitrageStrategy:
             if last_order.get_target() == self._starting_coin:
                 looping_paths.append(path)
                 
-        self.strat_paths = looping_paths[498:500] # test one path
+        self.strat_paths = looping_paths
         
         log.info(f'Using paths : [{self.strat_paths}]')
         self.strat_symbols = []
+        self.strat_assets = []
         for upath in self.strat_paths:
             self.strat_symbols += [order.get_symbol() for order in upath]
-        # self.strat_assets = set([order.get_base() for order in path for path in self.strat_paths])
+            self.strat_assets += [order.get_pair().get_base() for order in upath]
+            self.strat_assets += [order.get_pair().get_quote() for order in upath]
+            
+        self.strat_assets = list(set(self.strat_assets))
         log.info(f'Found [{len(looping_paths)}] possible paths for arbitrage starting on [{self._starting_coin}]')
-        
         return looping_paths
             
     def get_strat_symbols(self):
@@ -75,6 +78,8 @@ class ArbitrageStrategy:
         
     def reset_balance(self, val):
         self.balance = val
+        for asset in self.strat_assets:
+            log.info(f'Starting balance on [{asset}]=[{self.balance[asset]}]')
     
     def evaluate_path(self, path: List[Order], data):
         signal_desc = []
@@ -87,13 +92,13 @@ class ArbitrageStrategy:
         available_amount = initial_amount
         
         if available_amount == 0:
-            log.error(f"Cannot price strategy, available amount is null on [{initial_order.get_symbol()}]")
+            log.error(f"Cannot price strategy, available amount is null on [{initial_order.get_initial()}]")
             return 0, ""
 
         for order in path:
             symbol_prices = data.get(order.get_symbol()) 
             if symbol_prices is None:
-                log.warning(f'Market data on symbol {[order.get_symbol()]} unavailable, no signal')
+                log.debug(f'Market data on symbol {[order.get_symbol()]} unavailable, no signal')
                 return -1, ""
                         
             order.set_quantity(available_amount)
@@ -109,40 +114,39 @@ class ArbitrageStrategy:
                 order.set_price(ask)
                 available_amount *= (1/ask)
                 
-            order_pair = order.get_pair()    
+            order_pair = order.get_pair()
             available_amount = order_pair.validate_quantity(available_amount)
-
     
             order_desc = f'symbol=[{order.get_symbol()}], way=[{order.get_way()}] price=[{order.get_price()}], quantity=[{order.get_quantity()}]' 
             signal_desc.append(order_desc)
         
-        cost = available_amount - initial_amount
+        pnl = available_amount - initial_amount
         signal_desc_str = f"Arbitrage opportunity : {' && '.join(signal_desc)}"
-        log.info(f"Signal cost: {cost} starting amount=[{initial_amount}], final amount=[{available_amount}]")
+        log.debug(f"Signal pnl: {pnl} starting amount=[{initial_amount}], final amount=[{available_amount}] \ {signal_desc}")
 
-        return cost, signal_desc_str
+        return pnl, signal_desc_str
         
     def check_opportunity(self, data: Dict):
         if self.balance is None:
             return None
-        
+        signal = None
+        max_pnl = 0
         for i,path in enumerate(self.strat_paths):
             
-            cost ,signal_desc = self.evaluate_path(path, data)
+            pnl ,signal_desc = self.evaluate_path(path, data)
             
-            if cost == -1:
+            if pnl == -1:
                 continue
             
             if not self.is_data_complete[i]:
                 self.is_data_complete[i] = True
-                log.info(f"Market data available for path {i}, data={data}")            
-            if cost<1:
-                continue
-                
-            signal = Signal(
-                orders = path,
-                signal_description = signal_desc,
-                theo_pnl = round((100*cost)-100, 4)
-            )
-            return signal
-        return None
+                log.info(f"Market data available for path {i}, data={data}")   
+                         
+            if pnl>max_pnl:
+                max_pnl = pnl                                
+                signal = Signal(
+                    orders = path,
+                    signal_description = signal_desc,
+                    theo_pnl = pnl
+                )
+        return signal

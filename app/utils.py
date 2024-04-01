@@ -72,7 +72,7 @@ def get_timestamp():
     return int(time.time() * 1000)
 
 def init_logger(logger_name: str='UnNamedProcess'):
-    LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.INFO
     LOGFORMAT = "%(log_color)s%(asctime)s%(reset)s | %(log_color)s%(name)s%(reset)s | %(log_color)s%(levelname)s%(reset)s | %(message)s"
     logging.root.setLevel(LOG_LEVEL)
     formatter = ColoredFormatter(LOGFORMAT)

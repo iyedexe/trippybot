@@ -1,4 +1,7 @@
 from enum import Enum
+from utils import init_logger
+
+log = init_logger("FinObjects")
 
 class Way(Enum):
     BUY  = 0
@@ -60,13 +63,15 @@ class CoinPair:
             self.max_size = value
             
     def validate_quantity(self, quantity):
+        new_quantity = quantity
         if self.lot_size !=0 and (quantity % self.lot_size) != 0:
-            quantity = int(quantity/self.lot_size) * self.lot_size
-        if self.min_size !=0 and quantity < self.min_size:
-            quantity = self.min_size
-        if self.max_size !=0 and quantity > self.max_size:
-            quantity = self.max_size
-        return quantity
+            new_quantity = quantity - (quantity % self.lot_size)
+            log.debug(f"Corrected size on {self.symbol} using lot_size {self.lot_size} : [{quantity}]->[{new_quantity}]")
+        # if self.min_size !=0 and quantity < self.min_size:
+        #     quantity = self.min_size
+        # if self.max_size !=0 and quantity > self.max_size:
+        #     quantity = self.max_size
+        return new_quantity
             
     def __str__(self):
         return f"{self._base_asset}/{self._quote_asset}"
