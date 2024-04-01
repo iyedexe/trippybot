@@ -1,16 +1,10 @@
-# import telegram
 import signal
 import asyncio 
-import multiprocessing
 import aiohttp
 import json
 import uuid
-import configparser
-import time
-from collections import defaultdict 
-from financial_objects import Order, Signal, Way, CoinPair, OrderType
-from utils import get_timestamp, signal_handler, init_logger, compute_signature, TelegramSender
-from strategy import ArbitrageStrategy
+from financial_objects import Order, Way, CoinPair, OrderType
+from utils import get_timestamp, signal_handler, init_logger, compute_signature
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('BNBBroker')

@@ -1,6 +1,5 @@
 import requests
 import telegram
-import asyncio
 import logging
 import hmac
 import hashlib

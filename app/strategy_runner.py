@@ -5,7 +5,7 @@ from feed_handler import FeedHandler
 from utils import AsyncMixin
 import multiprocessing
 from financial_objects import Signal
-from utils import get_timestamp, signal_handler, init_logger, compute_signature, TelegramSender
+from utils import signal_handler, init_logger, TelegramSender
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('StrategyRunner')
@@ -41,7 +41,6 @@ class StrategyRunner(AsyncMixin):
             await self.telegram_sender.send_message(f"Signal received: \n\n Theo pnl = [{signal.get_theo_pnl()}] \n\n Description = [{signal.get_description()}]")
             for order in orders_list:
                 
-                # self.order_controller.control_size(order)
                 exec_response = await self.broker.execute_order(order)
                 log.info(f"exec : {exec_response}")
                 log.info(f'Finished executing order')

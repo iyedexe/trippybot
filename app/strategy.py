@@ -107,13 +107,14 @@ class ArbitrageStrategy:
             if order.get_way() == Way.SELL:
                 bid = float(symbol_prices.get("b"))
                 order.set_price(bid)
-                available_amount *= bid
+                available_amount *= bid 
                 
             elif order.get_way() == Way.BUY:
                 ask = float(symbol_prices.get("a"))
                 order.set_price(ask)
-                available_amount *= (1/ask)
+                available_amount *= (1/ask) * (1-FEE)
                 
+            available_amount = available_amount*(1 - FEE/100)
             order_pair = order.get_pair()
             available_amount = order_pair.validate_quantity(available_amount)
     
