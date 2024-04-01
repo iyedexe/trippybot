@@ -22,7 +22,7 @@ class ArbitrageStrategy:
         self._config = config
         self._starting_coin = config['STRATEGY']['starting_coin']
         self.balance = None
-        self.first_time = defaultdict(bool)
+        self.is_data_complete = defaultdict(bool)
 
     def get_steps(self, coin, pairs_universe) -> List[Order]:
         steps = []
@@ -108,7 +108,8 @@ class ArbitrageStrategy:
             signal_desc.append(order_desc)
                             
         signal_desc_str = f"Arbitrage opportunity : {' && '.join(signal_desc)}"
-        fees = pow(1 - FEE/100, 3)
+        fees = 1.4
+        # fees = pow(1 - FEE/100, 3)
         cost *= fees
         return cost, signal_desc_str
         
@@ -116,13 +117,16 @@ class ArbitrageStrategy:
         if self.balance is None:
             return None
         
-        for path in self.strat_paths:
+        for i,path in enumerate(self.strat_paths):
             
             cost ,signal_desc = self.evaluate_path(path, data)
             
             if cost == -1:
                 continue
-                            
+            
+            if not self.is_data_complete[i]:
+                self.is_data_complete[i] = True
+                log.info(f"Market data available for path {i}, data={data}")            
             if cost<1:
                 continue
                 
