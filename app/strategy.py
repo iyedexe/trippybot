@@ -106,11 +106,17 @@ class ArbitrageStrategy:
 
             if order.get_way() == Way.SELL:
                 bid = float(symbol_prices.get("b"))
+                if bid == 0:
+                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{bid}], raw=[{symbol_prices.get("b")}]')
+                    return 0, ""                    
                 order.set_price(bid)
                 available_amount *= bid 
                 
             elif order.get_way() == Way.BUY:
                 ask = float(symbol_prices.get("a"))
+                if ask == 0:
+                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{ask}], raw=[{symbol_prices.get("a")}]')
+                    return 0, ""
                 order.set_price(ask)
                 available_amount *= (1/ask) * (1-FEE)
                 
