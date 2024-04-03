@@ -39,18 +39,18 @@ Follow the simple example of the cycle based on BNB, BTC and ETH in that order :
 BNB -> BTC -> ETH -> BNB              
 a possible path is :  
 SELL BNB/BTC  
-    - unitary cost : 1 BNB * (100 - Fee1%)/100  
-    - get : Y1 BTC  
+    - unitary cost : 1 BNB  
+    - get : Y1 * (1 - Fee1%/100) BTC  
 BUY ETH/BTC  
-    - unitairy cost : 1 BTC * Fee2%  
-    - get : 1/X2 ETH  
+    - unitairy cost : 1 BTC   
+    - get : 1/X2 *(1 - Fee2%/100) ETH  
 SELL ETH/BNB  
-    - unitairy cost : 1 ETH * Fee3%  
-    - get : Y3 BNB  
+    - unitairy cost : 1 ETH   
+    - get : Y3 *(1 - Fee3%/100) BNB  
 
 ==> FinalBNB = StartingBNB * (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3  
 r is the profitabilty of a cycle :  
-**r = (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3**    
+**r = (1 - Fee1%/100) * (1 - Fee2%/100) * (1 - Fee3%/100) * Y1 * Y3 * 1/X2 **    
 **Startegy is profitable is made if r>1**       
 
 # Infra
