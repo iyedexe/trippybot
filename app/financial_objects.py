@@ -18,8 +18,6 @@ class OrderType(Enum):
     def __str__(self):
         return self.name
     
-INFINTY = 10e7
-
 class CoinPair:
     def __init__(self, base, quote, symbol=None):
         self._base_asset = base

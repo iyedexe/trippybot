@@ -83,7 +83,7 @@ class BNBWSClient:
                 
     async def establish_connection(self):
         self.session = aiohttp.ClientSession()
-        self.ws = await self.session.ws_connect(self._websocket_endpoint)
+        self.ws = await self.session.ws_connect(self._websocket_endpoint, max_msg_size = 10 * 1024 * 1024)
         log.info(f'Binance client WS connection established')
 
     async def execute_command(self, command, *args):
