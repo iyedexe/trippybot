@@ -118,7 +118,7 @@ class ArbitrageStrategy:
                     log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{ask}], raw=[{symbol_prices.get("a")}]')
                     return 0, ""
                 order.set_price(ask)
-                available_amount *= (1/ask) * (1-FEE)
+                available_amount *= (1/ask)
                 
             available_amount = available_amount*(1 - FEE/100)
             order_pair = order.get_pair()
