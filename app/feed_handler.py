@@ -1,11 +1,10 @@
 import signal
-import websocket
 import json
 import multiprocessing
 from utils import init_logger, signal_handler
+from financial_objects import MarketDataFrame
+import aiohttp
 
-# If you like to run in debug mode
-websocket.enableTrace(False)
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('FeedHandler')
 
@@ -16,54 +15,44 @@ class FeedHandler:
         self._websocket_endpoint = config[market_connection]['websocket_endpoint']
 
         self.symbol_list = symbol_list
-        self.data = {}
   
-    def on_open(self, wsapp):
-        log.info("WS connection opened ..")
-
-    def store_message(self, message):
+    def create_md_frame(self, message):
         dict_message = json.loads(message)
         data = dict_message.get("data")
-        if data is None:
-            return
-        symbol = data.get("s")
-        if symbol is None or symbol not in self.symbol_list:
-            return
-        self.data[symbol] = data
+        return MarketDataFrame(
+            symbol= data.get("s"),
+            bid = data.get("b"),
+            bid_qty= data.get("B"),
+            ask= data.get("a"),
+            ask_qty= data.get("A") 
+        )
 
-    def on_message(self, wsapp, message):
+    def on_message(self, message):
         try:            
-            # log.debug(f"receiverd frame : {message}")
-            self.store_message(message)
-            self.q.put(self.data)
+            frame = self.create_md_frame(message)
+            self.q.put(frame)
         except Exception as e:
             log.error(f"Exception on message : {message}")
             log.exception(f"{e}")
+
+    async def listen_socket(self):
+        while True:
+            wsMessage = await self.ws.receive()
+            # log.debug(f'Got message on ws: {wsMessage}')
+            if wsMessage.type == aiohttp.WSMsgType.ERROR:
+                log.critical(f"Error message received : [{wsMessage}]")
+                return None
+            if wsMessage.type == aiohttp.WSMsgType.TEXT:
+                self.on_message(wsMessage.data) 
             
-    def on_error(wsapp, error):
-        log.info(error)
-
-    def on_close(self, wsapp, close_status_code, close_msg):
-        log.info("Connection close")
-        log.info(close_status_code)
-        log.info(close_msg)
-
-    def on_ping(self, wsapp, message):
-        log.info("received ping from server")
-
-    def on_pong(self, wsapp, message):
-        log.info("received pong from server")
-
-    def run(self, q: multiprocessing.Queue):
+    async def run(self, q: multiprocessing.Queue):
         self.q = q
         log.info('Feed handler running ..')
         subscription_subject = '/'.join([f"{symbol.lower()}@bookTicker" for symbol in self.symbol_list])
         log.info(f"Subscribing to streams : {subscription_subject}")
-        wsapp = websocket.WebSocketApp(f"{self._websocket_endpoint}/stream?streams={subscription_subject}",
-                                        on_message=self.on_message,
-                                        on_open=self.on_open,
-                                        on_error=self.on_error,
-                                        on_ping=self.on_ping,
-                                        on_pong=self.on_pong)
-        wsapp.run_forever()
-        
+        self.session = aiohttp.ClientSession()
+        self.ws = await self.session.ws_connect(f"{self._websocket_endpoint}/stream?streams={subscription_subject}",
+                                                max_msg_size = 10 * 1024 * 1024)
+        log.info(f'Binance client WS connection established')
+        await self.listen_socket()
+

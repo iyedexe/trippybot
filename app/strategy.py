@@ -1,5 +1,5 @@
 from typing import List, Dict
-from financial_objects import Way, Signal, OrderType, Order,CoinPair
+from financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
 from collections import defaultdict
 from utils import init_logger
 FEE = 0.1
@@ -81,7 +81,7 @@ class ArbitrageStrategy:
         for asset in self.strat_assets:
             log.info(f'Starting balance on [{asset}]=[{self.balance[asset]}]')
     
-    def evaluate_path(self, path: List[Order], data):
+    def evaluate_path(self, path: List[Order], data: MarketDataFrame):
         signal_desc = []
 
         initial_order = path[0]

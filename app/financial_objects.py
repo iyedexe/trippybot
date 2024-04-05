@@ -155,3 +155,10 @@ class Signal:
     
     def get_description(self):
         return self.signal_description
+    
+class MarketDataFrame:
+    def __init__(self, ask, ask_qty, bid, bid_qty):
+        self.ask = ask
+        self.bid = bid
+        self.ask_qty = ask_qty
+        self.bid_qty = bid_qty
