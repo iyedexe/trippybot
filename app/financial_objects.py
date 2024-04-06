@@ -157,8 +157,19 @@ class Signal:
         return self.signal_description
     
 class MarketDataFrame:
-    def __init__(self, ask, ask_qty, bid, bid_qty):
-        self.ask = ask
-        self.bid = bid
-        self.ask_qty = ask_qty
-        self.bid_qty = bid_qty
+    def __init__(self, symbol, bid, bid_qty, ask, ask_qty):
+        self.symbol = symbol
+        self.ask = float(ask)
+        self.bid = float(bid)
+        self.ask_qty = float(ask_qty)
+        self.bid_qty = float(bid_qty)
+
+    def get_symbol(self):
+        return self.symbol
+    def get_bid(self):
+        return self.bid
+    def get_ask(self):
+        return self.ask
+    
+    def __str__(self):
+        return f"s=[{self.symbol}];b=[{self.bid_qty}]@[{self.bid}];a=[{self.ask_qty}]@[{self.ask}]"

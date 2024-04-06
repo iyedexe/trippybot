@@ -29,8 +29,8 @@ class StrategyRunner(AsyncMixin):
         symbols_list = self.strat.get_strat_symbols()
         
         self.q = multiprocessing.Queue()
-        self.feeder = FeedHandler(config, symbols_list)
-        self.feeder = multiprocessing.Process(name='FeedHandler', target=self.feeder.run, args=(self.q,))
+        self.fh = FeedHandler(config, symbols_list)
+        self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
 
     async def process_signal(self, signal: Signal):
         try:
@@ -50,7 +50,7 @@ class StrategyRunner(AsyncMixin):
         
         
     async def run(self):
-        self.feeder.start()
+        self.fh_process.start()
         try:
             await self.telegram_sender.send_message(f"Running Strategy, started feeder and broker, waiting for signals")
             while True:
@@ -71,6 +71,6 @@ class StrategyRunner(AsyncMixin):
             log.critical('An exception occured during strategy run')
             log.exception(e)  
 
-        self.feeder.terminate()
-        self.feeder.join()
+        self.fh_process.terminate()
+        self.fh_process.join()
         return 

@@ -1,6 +1,8 @@
 from typing import List, Dict
 from financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
-from collections import defaultdict
+import datetime
+import time
+from timeit import default_timer as timer
 from utils import init_logger
 FEE = 0.1
 RISK = 1
@@ -21,10 +23,17 @@ class ArbitrageStrategy:
     def __init__(self, config):
         self._config = config
         self._starting_coin = config['STRATEGY']['starting_coin']
+        self.logging_interval = int(config['STRATEGY'].get('logging_interval', 60))
         self.balance = None
-        self.is_data_complete = defaultdict(bool)
+        self.data={}
+        self.best_signal=None
+        self.best_time=None
+        self.best_pnl=None
+        self.num_signals=0
+        self.avg_signal_time=0
+        self.prev_time = time.time()
 
-    def get_steps(self, coin, pairs_universe) -> List[Order]:
+    def get_steps(self, coin, pairs_universe: List[CoinPair]) -> List[Order]:
         steps = []
         for pair in pairs_universe:
             if coin == pair.get_base():
@@ -70,7 +79,9 @@ class ArbitrageStrategy:
             self.strat_assets += [order.get_pair().get_quote() for order in upath]
             
         self.strat_assets = list(set(self.strat_assets))
+        self.strat_symbols = list(set(self.strat_symbols))
         log.info(f'Found [{len(looping_paths)}] possible paths for arbitrage starting on [{self._starting_coin}]')
+        log.info(f'Total used sybmols=[{len(self.strat_symbols)}], Total used assets=[{len(self.strat_assets)}]')
         return looping_paths
             
     def get_strat_symbols(self):
@@ -81,7 +92,7 @@ class ArbitrageStrategy:
         for asset in self.strat_assets:
             log.info(f'Starting balance on [{asset}]=[{self.balance[asset]}]')
     
-    def evaluate_path(self, path: List[Order], data: MarketDataFrame):
+    def evaluate_path(self, path: List[Order]):
         signal_desc = []
 
         initial_order = path[0]
@@ -93,30 +104,30 @@ class ArbitrageStrategy:
         
         if available_amount == 0:
             log.error(f"Cannot price strategy, available amount is null on [{initial_order.get_initial()}]")
-            return 0, ""
+            return None, ""
 
         for order in path:
-            symbol_prices = data.get(order.get_symbol()) 
-            if symbol_prices is None:
+            symbol_last_update = self.data.get(order.get_symbol()) 
+            if symbol_last_update is None:
                 log.debug(f'Market data on symbol {[order.get_symbol()]} unavailable, no signal')
-                return -1, ""
+                return None, ""
                         
             order.set_quantity(available_amount)
             order.set_type(OrderType.MARKET)
 
             if order.get_way() == Way.SELL:
-                bid = float(symbol_prices.get("b"))
+                bid = symbol_last_update.get_bid()
                 if bid == 0:
-                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{bid}], raw=[{symbol_prices.get("b")}]')
-                    return 0, ""                    
+                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{bid}]')
+                    return None, ""                    
                 order.set_price(bid)
                 available_amount *= bid 
                 
             elif order.get_way() == Way.BUY:
-                ask = float(symbol_prices.get("a"))
+                ask = symbol_last_update.get_ask()
                 if ask == 0:
-                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{ask}], raw=[{symbol_prices.get("a")}]')
-                    return 0, ""
+                    log.error(f'Error on market data for symbol {[order.get_symbol()]} bid=[{ask}]')
+                    return None, ""
                 order.set_price(ask)
                 available_amount *= (1/ask)
                 
@@ -132,23 +143,39 @@ class ArbitrageStrategy:
         log.debug(f"Signal pnl: {pnl} starting amount=[{initial_amount}], final amount=[{available_amount}] \ {signal_desc}")
 
         return pnl, signal_desc_str
-        
-    def check_opportunity(self, data: Dict):
-        if self.balance is None:
-            return None
+    
+    def log_stats_info(self):
+        current_time = time.time()
+        if current_time > self.prev_time + self.logging_interval:
+            self.prev_time = current_time
+            log.info(f"Strategy running on [{len(self.strat_paths)}]")
+            log.info(f"Processes [{self.num_signals}] signals in total with and avg time of [{self.avg_signal_time}]")
+            if self.best_pnl is None:
+                log.info("No signal yet computed, market data unavailable")
+                return
+            log.info(f"Best signal so far occured @ [{datetime.datetime.fromtimestamp(self.best_time).strftime('%Y-%m-%dT%H:%M:%SZ')}]"
+                     f"PNL=[{self.best_pnl}]"
+                     f"DESC=[{self.best_signal.get_description()}]")
+    
+    def check_opportunity(self, data: MarketDataFrame):
+        start = timer()
+        impacted_paths=[]
+        update_symbol = data.get_symbol()
+        self.data[update_symbol] = data
+        for path in self.strat_paths:
+            for step in path:
+                if (self.data.get(step.get_symbol()) is not None) and (step.get_symbol() == update_symbol):
+                    impacted_paths.append(path)
+                    break
+                                
         signal = None
         max_pnl = 0
-        for i,path in enumerate(self.strat_paths):
+        for path in impacted_paths:
             
-            pnl ,signal_desc = self.evaluate_path(path, data)
-            
-            if pnl == -1:
+            pnl ,signal_desc = self.evaluate_path(path)
+            if pnl is None:
                 continue
-            
-            if not self.is_data_complete[i]:
-                self.is_data_complete[i] = True
-                log.info(f"Market data available for path {i}, data={data}")   
-                         
+                                     
             if pnl>max_pnl:
                 max_pnl = pnl                                
                 signal = Signal(
@@ -156,4 +183,21 @@ class ArbitrageStrategy:
                     signal_description = signal_desc,
                     theo_pnl = pnl
                 )
+
+            if self.best_pnl is None or pnl>self.best_pnl:
+                self.best_signal = Signal(
+                    orders = path,
+                    signal_description = signal_desc,
+                    theo_pnl = pnl
+                )
+                self.best_pnl = pnl
+                self.best_time = time.time()
+                    
+        end = timer()
+        elapsed_time = end - start
+        self.num_signals +=1
+        self.avg_signal_time += elapsed_time/self.num_signals
+        self.log_stats_info()
+
         return signal
+        
