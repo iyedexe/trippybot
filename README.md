@@ -82,6 +82,9 @@ https://github.com/binance/binance-signature-examples/blob/master/python/websock
 https://dev.to/ken_mwaura1/crypto-data-bot-using-python-binance-websockets-and-postgresql-db-5fnd    
 ### potential improvement:
 https://www.thealgorists.com/Algo/ShortestPaths/Arbitrage    
+### Market data ressource :
+https://polygon.io/flat-files/crypto-trades    
+https://www.cryptoarchive.com.au/downloads     
 
 # How to setup :
     >python -m venv venv       
