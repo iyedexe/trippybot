@@ -1,10 +1,8 @@
 import asyncio
 import configparser
 import signal
-from strategy_runner import StrategyRunner
-from utils import signal_handler, init_logger
-
-# log = init_logger("MainApp")
+from src.apps.strategy_runner import StrategyRunner
+from src.common.utils import signal_handler
 
 signal.signal(signal.SIGINT, signal_handler)
 

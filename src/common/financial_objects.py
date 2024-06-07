@@ -1,3 +1,5 @@
+import time
+import datetime
 from enum import Enum
 from utils import init_logger
 
@@ -157,12 +159,27 @@ class Signal:
         return self.signal_description
     
 class MarketDataFrame:
-    def __init__(self, symbol, bid, bid_qty, ask, ask_qty):
+    def __init__(self, symbol, bid, bid_qty, ask, ask_qty, local_ts, market_ts):
         self.symbol = symbol
         self.ask = float(ask)
         self.bid = float(bid)
         self.ask_qty = float(ask_qty)
         self.bid_qty = float(bid_qty)
+        self.local_ts = local_ts
+        self.market_ts = market_ts
+
+    def get_header_str(self, sep=";"):
+        return f"timestamp{sep}bid_qty{sep}bid{sep}ask{sep}ask_qty"
+    
+    def get_frame_str(self, sep=";"):
+        return f"{time.mktime(self.local_ts.timetuple())}{sep}{self.bid_qty}{sep}{self.bid}{sep}{self.ask}{sep}{self.ask_qty}"
+
+
+    def get_date(self):
+        return self.local_ts.date()
+    
+    def get_timestamp(self):
+        return self.local_ts
 
     def get_symbol(self):
         return self.symbol

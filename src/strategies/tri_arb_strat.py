@@ -1,23 +1,12 @@
-from typing import List, Dict
-from financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
+from typing import List
+from src.common.financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
 import datetime
 import time
 from timeit import default_timer as timer
-from utils import init_logger
+from src.common.utils import init_logger
 FEE = 0.1
 RISK = 1
 log = init_logger('Strategy')
-
-# bid price is for price for selling base currency
-# 1 quote == bid base
-# BNB/USDT
-#Sell BNB/USDT means:
-    # give BNB -> get USDT
-    # 1 BNB -> bid USDT 
-
-#Buy BNB/USDT means:
-    # give USDT -> get BNB
-    # 1 USDT -> 1/ask BNB 
 
 class ArbitrageStrategy:
     def __init__(self, config):

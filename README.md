@@ -13,12 +13,13 @@
     - After processing signal, use only last update
 
 * DevOps:
-    - automatic Jenkins deployment on aws zone    
+    - Automatic Jenkins deployment on aws zone    
     - Grafana monitoring     
-        - technical metrics on process health, network traffic, server cpu and mem    
-        - functional metrics on current balance, list of trades, PNL per trade and global    
+        - Technical metrics on process health, network traffic, server cpu and mem    
+        - Functional metrics on current balance, list of trades, PNL per trade and global    
 
-* Strategies : 
+* Strategies :
+    - Create book recorder
     - Create strategy backtester
     - ML reinforcement learning
     - Arbitrage strategy using bellmanford

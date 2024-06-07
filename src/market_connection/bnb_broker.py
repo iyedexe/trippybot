@@ -3,8 +3,8 @@ import asyncio
 import aiohttp
 import json
 import uuid
-from financial_objects import Order, Way, CoinPair, OrderType
-from utils import get_timestamp, signal_handler, init_logger, compute_signature
+from src.common.financial_objects import Order, Way, CoinPair, OrderType
+from src.common.utils import get_timestamp, signal_handler, init_logger, compute_signature
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('BNBBroker')

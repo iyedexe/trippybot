@@ -6,11 +6,12 @@ import signal
 import aiohttp
 import json
 import multiprocessing
+import datetime
 
 from collections import defaultdict 
 
-from utils import init_logger, signal_handler
-from financial_objects import MarketDataFrame
+from src.common.utils import init_logger, signal_handler
+from src.common.financial_objects import MarketDataFrame
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('FeedHandler')
@@ -26,7 +27,7 @@ class FeedHandler:
         self.number_of_updates = defaultdict(int)
         self.prev_time = time.time()
   
-    def create_md_frame(self, message):
+    def create_md_frame(self, message) -> MarketDataFrame:
         dict_message = json.loads(message)
         data = dict_message.get("data")        
         return MarketDataFrame(
@@ -34,7 +35,9 @@ class FeedHandler:
             bid = data.get("b"),
             bid_qty= data.get("B"),
             ask= data.get("a"),
-            ask_qty= data.get("A") 
+            ask_qty= data.get("A"),
+            local_ts = datetime.datetime.now(), #localTimestamp on reception
+            market_ts= None, #Market timestamp
         )
 
     def log_stats_info(self, frame):
@@ -73,7 +76,7 @@ class FeedHandler:
         self.session = aiohttp.ClientSession()
         self.ws = await self.session.ws_connect(f"{self._websocket_endpoint}/stream?streams={subscription_subject}",
                                                 max_msg_size = 10 * 1024 * 1024)
-        log.info(f'Binance client WS connection established')
+        log.info('Binance client WS connection established')
         await self.listen_socket()
 
     def run(self, q: multiprocessing.Queue):

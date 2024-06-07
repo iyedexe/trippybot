@@ -1,11 +1,11 @@
 import signal
-from strategy import ArbitrageStrategy
-from bnb_broker import BNBBroker
-from feed_handler import FeedHandler
-from utils import AsyncMixin
+from src.strategies.tri_arb_strat import ArbitrageStrategy
+from src.market_connection.bnb_broker import BNBBroker
+from src.market_connection.feed_handler import FeedHandler
+from src.common import AsyncMixin
 import multiprocessing
-from financial_objects import Signal
-from utils import signal_handler, init_logger, TelegramSender
+from src.common.financial_objects import Signal
+from src.common.utils import signal_handler, init_logger, TelegramSender
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('StrategyRunner')
@@ -35,7 +35,7 @@ class StrategyRunner(AsyncMixin):
     async def process_signal(self, signal: Signal):
         try:
             orders_list = signal.get_orders_list()
-            log.info(f"Signal received:")
+            log.info("Signal received:")
             log.info(f"Theo pnl = [{signal.get_theo_pnl()}]")
             log.info(f"Description = [{signal.get_description()}]")
             await self.telegram_sender.send_message(f"Signal received: \n\n Theo pnl = [{signal.get_theo_pnl()}] \n\n Description = [{signal.get_description()}]")
@@ -43,7 +43,7 @@ class StrategyRunner(AsyncMixin):
                 
                 exec_response = await self.broker.execute_order(order)
                 log.info(f"exec : {exec_response}")
-                log.info(f'Finished executing order')
+                log.info('Finished executing order')
         except Exception as e:
             log.critical('An exception occured during signal processing')
             log.exception(e)  
@@ -52,7 +52,7 @@ class StrategyRunner(AsyncMixin):
     async def run(self):
         self.fh_process.start()
         try:
-            await self.telegram_sender.send_message(f"Running Strategy, started feeder and broker, waiting for signals")
+            await self.telegram_sender.send_message("Running Strategy, started feeder and broker, waiting for signals")
             while True:
                 data = self.q.get()
                 signal = self.strat.check_opportunity(data)
@@ -63,7 +63,7 @@ class StrategyRunner(AsyncMixin):
                 log.info('Caught new signal ..')
                 await self.process_signal(signal)
                 
-                log.info(f'Reinitializing portfolio, getting coin balances')
+                log.info('Reinitializing portfolio, getting coin balances')
                 balances = await self.broker.get_balances()
                 self.strat.reset_balance(balances)
 

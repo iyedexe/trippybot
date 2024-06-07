@@ -1,3 +1,4 @@
+import os
 import requests
 import telegram
 import logging
@@ -87,3 +88,12 @@ def init_logger(logger_name: str='UnNamedProcess'):
 def compute_signature(payload, key):
     return hashing(urlencode(dict(sorted(payload.items()))), key)
     
+def get_root_path():
+    utils_folder = os.path.dirname(os.path.abspath(__file__))
+    root_folder = os.path.dirname(utils_folder)
+    return root_folder
+
+def get_data_path():
+    root_folder = get_root_path()
+    data_folder = os.path.join(root_folder, "data/")
+    return data_folder
