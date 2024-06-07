@@ -1,25 +1,27 @@
+# Presentation :
+* This repo is my personnal attempt to become the new Jim Simmons
+* a framework/codebase for creating strategies and backtesting them.
+* The reason for this rogue framework (and not using backtrader, vectorbt or even quantconnect)
+    - Simplicity and ease of mind of being batman.
+    - Working with asynchronous market data signals 
+    - OCLH sucks !
+
 # TODO :
+* Strategy runner:
+    - Strategy evaluate if quantity on book is enough.
+    - Handle and process exec quantity
+    - After processing signal, use only last update
 
-## Minimum viable product
-* Strategy evaluate if quantity on book is enough
-* Handle and process exec quantity
-* after processing signal, use only last update
-* FeedHandler in AIOHTTP async
+* DevOps:
+    - automatic Jenkins deployment on aws zone    
+    - Grafana monitoring     
+        - technical metrics on process health, network traffic, server cpu and mem    
+        - functional metrics on current balance, list of trades, PNL per trade and global    
 
-## Minimum marketable product
-* App deployment in AWS Tokyo region, automatic restart daily, file logging    
-* App monitoring via graphana:    
-    - technical metrics on process health, network traffic, server cpu and mem    
-    - functional metrics on current balance, list of trades, PNL per trade and global    
-* Add strategy backtesting method into framework
-
-## Continuous improvements
-* Make code generic and working for different exchnage brokers
-* Use framework for different strategies
-    - Basic Cross exchange arbitrage (could be beneficial)
-    - BellmanFord path finder arbitrage (for the maths)
-    - Triangular cross exchange arbitrage (very promising)
- 
+* Strategies : 
+    - Create strategy backtester
+    - ML reinforcement learning
+    - Arbitrage strategy using bellmanford
 
 # Implementation choices :
 
