@@ -5,23 +5,23 @@ from src.market_connection.bnb_broker import BNBBroker
 from src.market_connection.feed_handler import FeedHandler
 from src.common import AsyncMixin
 import multiprocessing
-from src.common.financial_objects import Signal, MarketDataFrame
+from src.common.financial_objects import MarketDataFrame
 from src.common.utils import signal_handler, init_logger, get_data_path
 
 signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('StrategyRunner')
 
 
-class BookRecorder(AsyncMixin):
+class RecorderRunner(AsyncMixin):
     async def __ainit__(self, config):
 
         self.broker = BNBBroker(config)      
         await self.broker.init()
 
-        symbols_list = await self.broker.get_symbols()         
+        self.symbols_list = await self.broker.get_symbols()         
        
         self.q = multiprocessing.Queue()
-        self.fh = FeedHandler(config, symbols_list)
+        self.fh = FeedHandler(config, self.symbols_list)
         self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
 
     async def record_data(self, data: MarketDataFrame, format="csv"):
@@ -38,8 +38,6 @@ class BookRecorder(AsyncMixin):
             else:
                 open_mode = "w"
                 add_header = True
-            
-            
             async with aiofiles.open(file_path, mode=open_mode) as f:
                 if add_header:
                     await f.write(data.get_header_str())
@@ -50,6 +48,7 @@ class BookRecorder(AsyncMixin):
         
         
     async def run(self):
+        log.info(f"Starting recorder runner on [{len(self.symbols_list)}] symbols")
         self.fh_process.start()
         try:
             while True:
