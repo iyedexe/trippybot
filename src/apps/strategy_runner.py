@@ -1,7 +1,7 @@
 import signal
 from src.strategies.tri_arb_strat import ArbitrageStrategy
 from src.market_connection.bnb_broker import BNBBroker
-from src.market_connection.feed_handler import FeedHandler
+from src.market_connection.feed_handler import TickFeedHandler
 from src.common import AsyncMixin
 import multiprocessing
 from src.common.financial_objects import Signal
@@ -29,8 +29,8 @@ class StrategyRunner(AsyncMixin):
         symbols_list = self.strat.get_strat_symbols()
         
         self.q = multiprocessing.Queue()
-        self.fh = FeedHandler(config, symbols_list)
-        self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
+        self.fh = TickFeedHandler(config, symbols_list)
+        self.fh_process = multiprocessing.Process(name='TickFeedHandler', target=self.fh.run, args=(self.q,))
 
     async def process_signal(self, signal: Signal):
         try:

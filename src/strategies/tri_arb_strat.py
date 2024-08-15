@@ -1,4 +1,3 @@
-from typing import List
 from src.common.financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
 import datetime
 import time
@@ -22,7 +21,7 @@ class ArbitrageStrategy:
         self.avg_signal_time=0
         self.prev_time = time.time()
 
-    def get_steps(self, coin, pairs_universe: List[CoinPair]) -> List[Order]:
+    def get_steps(self, coin, pairs_universe: list[CoinPair]) -> list[Order]:
         steps = []
         for pair in pairs_universe:
             if coin == pair.get_base():
@@ -34,7 +33,7 @@ class ArbitrageStrategy:
             steps.append(Order(pair, way))
         return steps
     
-    def init_strategy(self, full_pairs_universe = List[CoinPair]):
+    def init_strategy(self, full_pairs_universe: list[CoinPair]):
         
         first_steps = self.get_steps(self._starting_coin, full_pairs_universe)
         prev_paths = [[step] for step in first_steps]
@@ -81,7 +80,7 @@ class ArbitrageStrategy:
         for asset in self.strat_assets:
             log.info(f'Starting balance on [{asset}]=[{self.balance[asset]}]')
     
-    def evaluate_path(self, path: List[Order]):
+    def evaluate_path(self, path: list[Order]):
         signal_desc = []
 
         initial_order = path[0]
@@ -149,6 +148,8 @@ class ArbitrageStrategy:
     def check_opportunity(self, data: MarketDataFrame):
         start = timer()
         impacted_paths=[]
+
+        # Determine arbitrage paths impacted by MD update
         update_symbol = data.get_symbol()
         self.data[update_symbol] = data
         for path in self.strat_paths:
@@ -157,6 +158,7 @@ class ArbitrageStrategy:
                     impacted_paths.append(path)
                     break
                                 
+        # Compute PNL for every path and generate signal for most profitable
         signal = None
         max_pnl = 0
         for path in impacted_paths:
