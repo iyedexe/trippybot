@@ -8,12 +8,14 @@
 
 ## Strategies :
 ### Triangular arbitrage:
-* Jumps over 3 crypto coins by means of selling and buying associated pairs, so that a positive PNL is realised just with 3 transactions.  
-#### Strategy profitability evaluation:
-Follow the simple example of the cycle based on BNB, BTC and ETH in that order :  
-
-BNB -> BTC -> ETH -> BNB              
-a possible path is :  
+Triangular arbitrage (also referred to as cross currency arbitrage or three-point arbitrage) is the act of exploiting an arbitrage opportunity resulting from a pricing discrepancy among three different currencies in the foreign exchange market.   
+![image](https://github.com/user-attachments/assets/f8a9bdb0-e7bc-46b5-b042-339fa9926c30)
+Using a starting coin, a path is a combination of BUY and SELL transactions performed simultaniously (here done in sequence because of illiquid portfolio).
+These transactions result in a higher balance of the starting coin.
+* Example :  
+The simple arbitage cycle based on BNB, BTC and ETH in that order :  
+BNB -> BTC -> ETH -> BNB
+One possible path is :  
 SELL BNB/BTC  
     - unitary cost : 1 BNB  
     - get : Y1 * (1 - Fee1%/100) BTC  
@@ -27,7 +29,10 @@ SELL ETH/BNB
 ==> FinalBNB = StartingBNB * (100 - Fee1%) * Y1 * (100 - Fee2%) * 1/X2 * (100 - Fee3%) * Y3  
 r is the profitabilty of a cycle :  
 **r = (1 - Fee1%/100) * (1 - Fee2%/100) * (1 - Fee3%/100) * Y1 * Y3 * 1/X2 **    
-**Startegy is profitable is made if r>1**       
+**Startegy is profitable is made if r>1**      
+
+The implementation of this strategy is initialized using one starting currency and computes all possible arbitrage paths.
+It later performs a profitability check on every tick and if an arbitrage opportunity is detected it trades it.
 
 ### Reinforcement learning:
 
