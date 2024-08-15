@@ -1,51 +1,15 @@
-# Presentation :
-* This repo is my personnal attempt to become the new Jim Simmons
-* a framework/codebase for creating strategies and backtesting them.
+# Trippy Bot :
+## Presentation :
+* This is a start of a framework/codebase for creating strategies and backtesting them.
 * The reason for this rogue framework (and not using backtrader, vectorbt or even quantconnect)
     - Working with asynchronous market data signals 
     - Flexibility with market data fields and frequency
     - Simplicity and ease of mind of being batman.
 
-# Strategies :
-## Triangular arbitrage:
+## Strategies :
+### Triangular arbitrage:
 * Jumps over 3 crypto coins by means of selling and buying associated pairs, so that a positive PNL is realised just with 3 transactions.  
-  
-## Reinforcement learning:
-
-## Supertrend:
-
-
-# TODO :
-* Strategy runner:
-    - Strategy evaluate if quantity on book is enough.
-    - Handle and process exec quantity
-    - After processing signal, use only last update
-
-* DevOps:
-    - Automatic Jenkins deployment on aws zone    
-    - Grafana monitoring     
-        - Technical metrics on process health, network traffic, server cpu and mem    
-        - Functional metrics on current balance, list of trades, PNL per trade and global    
-
-* Strategies :
-    - Create book recorder
-    - Create strategy backtester
-    - ML reinforcement learning
-    - Arbitrage strategy using bellmanford
-
-# Implementation choices :
-
-## Order size:
-when we say we BUY(<-) a PAIR USD/EUR we are buying the base, ie USD and selling the quote, ie EUR.  
-==> we are spending EUR.  
-when we say we SELL(->) a PAIR USD/EUR we are selling the base, ie USD and buying the quote, ie EUR.  
-==> we are spending USD  
-
-this resulted in the choice where   
-    - **buy orders are sized in quote currency**  
-    - **sell orders are sized in base currency**  
-
-## Strategy profitability evaluation:
+#### Strategy profitability evaluation:
 Follow the simple example of the cycle based on BNB, BTC and ETH in that order :  
 
 BNB -> BTC -> ETH -> BNB              
@@ -64,6 +28,23 @@ SELL ETH/BNB
 r is the profitabilty of a cycle :  
 **r = (1 - Fee1%/100) * (1 - Fee2%/100) * (1 - Fee3%/100) * Y1 * Y3 * 1/X2 **    
 **Startegy is profitable is made if r>1**       
+
+### Reinforcement learning:
+
+### Supertrend:
+
+# Implementation choices :
+
+## Order size:
+when we say we BUY(<-) a PAIR USD/EUR we are buying the base, ie USD and selling the quote, ie EUR.  
+==> we are spending EUR.  
+when we say we SELL(->) a PAIR USD/EUR we are selling the base, ie USD and buying the quote, ie EUR.  
+==> we are spending USD  
+
+this resulted in the choice where   
+    - **buy orders are sized in quote currency**  
+    - **sell orders are sized in base currency**  
+
 
 # Infra
 After some research and experimentation, latency can be critical in such strategy and any way to minimize it is welcome.   
@@ -105,3 +86,22 @@ https://www.cryptoarchive.com.au/downloads
     linux :    
     >source venv/bin/activate   
     >pip install -r requirements.txt   
+
+
+# TODO :
+* Strategy runner:
+    - Strategy evaluate if quantity on book is enough.
+    - Handle and process exec quantity
+    - After processing signal, use only last update
+
+* DevOps:
+    - Automatic Jenkins deployment on aws zone    
+    - Grafana monitoring     
+        - Technical metrics on process health, network traffic, server cpu and mem    
+        - Functional metrics on current balance, list of trades, PNL per trade and global    
+
+* Strategies :
+    - Create book recorder
+    - Create strategy backtester
+    - ML reinforcement learning
+    - Arbitrage strategy using bellmanford
