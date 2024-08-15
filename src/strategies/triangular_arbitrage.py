@@ -7,7 +7,7 @@ FEE = 0.1
 RISK = 1
 log = init_logger('Strategy')
 
-class ArbitrageStrategy:
+class TriangularArbitrage:
     def __init__(self, config):
         self._config = config
         self._starting_coin = config['STRATEGY']['starting_coin']

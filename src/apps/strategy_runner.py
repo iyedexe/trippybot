@@ -1,5 +1,5 @@
 import signal
-from src.strategies.tri_arb_strat import ArbitrageStrategy
+from src.strategies.triangular_arbitrage import TriangularArbitrage
 from src.market_connection.bnb_broker import BNBBroker
 from src.market_connection.feed_handler import TickFeedHandler
 from src.common import AsyncMixin
@@ -14,7 +14,7 @@ log = init_logger('StrategyRunner')
 class StrategyRunner(AsyncMixin):
     async def __ainit__(self, config):
 
-        self.strat = ArbitrageStrategy(config)
+        self.strat = TriangularArbitrage(config)
         self.broker = BNBBroker(config)
         self.telegram_sender = TelegramSender(config)
         

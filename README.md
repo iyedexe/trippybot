@@ -2,9 +2,18 @@
 * This repo is my personnal attempt to become the new Jim Simmons
 * a framework/codebase for creating strategies and backtesting them.
 * The reason for this rogue framework (and not using backtrader, vectorbt or even quantconnect)
-    - Simplicity and ease of mind of being batman.
     - Working with asynchronous market data signals 
-    - OCLH sucks !
+    - Flexibility with market data fields and frequency
+    - Simplicity and ease of mind of being batman.
+
+# Strategies :
+## Triangular arbitrage:
+* Jumps over 3 crypto coins by means of selling and buying associated pairs, so that a positive PNL is realised just with 3 transactions.  
+  
+## Reinforcement learning:
+
+## Supertrend:
+
 
 # TODO :
 * Strategy runner:

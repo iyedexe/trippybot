@@ -18,6 +18,11 @@ log = init_logger('FeedHandler')
 
 
 class FeedHanlder:
+    """
+    Generic async class for market data server
+    Uses websocket to subscribe to binance MD.
+    pushes updates on multiprocess queue
+    """
     def __init__(self, config, symbol_list: list[str]):
         market_connection = config['FEED_HANDLER']['market_connection']
         self.logging_interval = int(config['FEED_HANDLER'].get('logging_interval', 60))
