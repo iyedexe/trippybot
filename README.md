@@ -9,10 +9,10 @@
 ## Strategies :
 ### Triangular arbitrage:
 Triangular arbitrage (also referred to as cross currency arbitrage or three-point arbitrage) is the act of exploiting an arbitrage opportunity resulting from a pricing discrepancy among three different currencies in the foreign exchange market.   
-![image](https://github.com/user-attachments/assets/f8a9bdb0-e7bc-46b5-b042-339fa9926c30)
-Using a starting coin, a path is a combination of BUY and SELL transactions performed simultaniously (here done in sequence because of illiquid portfolio).
-These transactions result in a higher balance of the starting coin.
-* Example :  
+![image](https://github.com/user-attachments/assets/f8a9bdb0-e7bc-46b5-b042-339fa9926c30).     
+Using a starting coin, a path is a combination of BUY and SELL transactions performed simultaniously (here done in sequence because of illiquid portfolio).   
+These transactions result in a higher balance of the starting coin.   
+* Example :   
 The simple arbitage cycle based on BNB, BTC and ETH in that order :  
 BNB -> BTC -> ETH -> BNB
 One possible path is :  
