@@ -35,7 +35,7 @@ class StrategyRunner:
         symbols_list = self.strat.get_strat_symbols()
         self.fh.subscribe(symbols_list)
         self.q = multiprocessing.Queue()
-        self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
+        self.fh_process = multiprocessing.Process(name='FEEDER', target=self.fh.run, args=(self.q,))
 
     async def process_signal(self, signal: Signal):
         try:

@@ -2,7 +2,7 @@ import signal
 import os
 import aiofiles
 from src.market_connection.bnb_broker import BNBBroker
-from src.market_connection.feed_handler import FeedHandler
+from src.market_connection.bnb_feeder import BNBFeeder
 from src.common import AsyncMixin
 import multiprocessing
 from src.common.financial_objects import MarketDataFrame
@@ -21,8 +21,8 @@ class RecorderRunner(AsyncMixin):
         self.symbols_list = await self.broker.get_symbols()         
        
         self.q = multiprocessing.Queue()
-        self.fh = FeedHandler(config, self.symbols_list)
-        self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
+        self.fh = BNBFeeder(config, self.symbols_list)
+        self.fh_process = multiprocessing.Process(name='Feeder', target=self.fh.run, args=(self.q,))
 
     async def record_data(self, data: MarketDataFrame, format="csv"):
         try:

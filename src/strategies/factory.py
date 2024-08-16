@@ -3,19 +3,19 @@ from dataclasses import dataclass
 from src.strategies.reinforcement_learning import ReinforcementLearningStrat
 from src.strategies.supertrend import SuperTrendStrat
 from src.strategies.triangular_arbitrage import TriangularArbitrage
-from src.market_connection.feed_handler import TickFeedHandler, CandleStickFeedHandler
+from src.market_connection.bnb_feeder import TickBNBFeeder, CandleStickBNBFeeder
 from src.strategies.istrategy import IStrategy
-from src.market_connection.feed_handler import IFeeder
+from src.market_connection.bnb_feeder import IBNBFeeder
 
 @dataclass
 class StrategyEnv:
     strat: IStrategy
-    feed: IFeeder
+    feed: IBNBFeeder
 
 STRAT_MAP = {
-    "reinforcement_learning" : StrategyEnv(ReinforcementLearningStrat, TickFeedHandler),
-    "supertrend" : StrategyEnv(SuperTrendStrat, CandleStickFeedHandler), 
-    "triangular_arbitrage" : StrategyEnv(TriangularArbitrage, TickFeedHandler)
+    "reinforcement_learning" : StrategyEnv(ReinforcementLearningStrat, TickBNBFeeder),
+    "supertrend" : StrategyEnv(SuperTrendStrat, CandleStickBNBFeeder), 
+    "triangular_arbitrage" : StrategyEnv(TriangularArbitrage, TickBNBFeeder)
 }
 
 class StratFactory:

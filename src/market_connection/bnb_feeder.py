@@ -17,7 +17,7 @@ signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('Feeder')
 
 
-class IFeeder:
+class IBNBFeeder:
     """
     Generic async class for market data server
     Uses websocket to subscribe to binance MD.
@@ -86,7 +86,7 @@ class IFeeder:
     def run(self, q: multiprocessing.Queue):
         asyncio.run(self.run_(q))
 
-class CandleStickFeeder(IFeeder):
+class CandleStickBNBFeeder(IBNBFeeder):
     def create_md_frame(self, message) -> CandleStickMD:
         dict_message = json.loads(message)
         data = dict_message.get("data")        
@@ -107,7 +107,7 @@ class CandleStickFeeder(IFeeder):
         return websocket_uri
 
 
-class TickFeeder(IFeeder):
+class TickBNBFeeder(IBNBFeeder):
     def create_md_frame(self, message) -> TickMD:
         dict_message = json.loads(message)
         data = dict_message.get("data")        
@@ -133,7 +133,7 @@ def main():
     config.read('config.ini')
 
     logging.root.setLevel(logging.DEBUG)
-    fh = CandleStickFeeder(config, ["BTCUSDT", "TRXUSDT"])
+    fh = CandleStickBNBFeeder(config, ["BTCUSDT", "TRXUSDT"])
     q = multiprocessing.Queue()
     fh.run(q)
 
