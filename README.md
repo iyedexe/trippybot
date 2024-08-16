@@ -6,6 +6,18 @@
     - Flexibility with market data fields and frequency
     - Simplicity and ease of mind of being batman.
 
+## HOW to :
+{code}
+Run a strategy live:
+live_trader.py --configfile live_config.ini --strategy <STRAT_NAME>
+
+Backtest a strategy:
+backtester.py --configfile backtest_config.ini --strategy <STRAT_NAME>
+
+Record market data:
+recorder.py --configfile recorder_config.ini --symbols <SYMBOLS_LIST> --type <TICK|CANDLE>
+{code}
+
 ## Strategies :
 ### Triangular arbitrage:
 Triangular arbitrage (also referred to as cross currency arbitrage or three-point arbitrage) is the act of exploiting an arbitrage opportunity resulting from a pricing discrepancy among three different currencies in the foreign exchange market.   
