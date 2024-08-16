@@ -1,9 +1,8 @@
 import signal
-from src.strategies.triangular_arbitrage import TriangularArbitrage
-from src.market_connection.bnb_broker import BNBBroker
-from src.market_connection.feed_handler import TickFeedHandler
-from src.common import AsyncMixin
 import multiprocessing
+
+from src.strategies.factory import StratFactory
+from src.market_connection.bnb_broker import BNBBroker
 from src.common.financial_objects import Signal
 from src.common.utils import signal_handler, init_logger, TelegramSender
 
@@ -11,12 +10,19 @@ signal.signal(signal.SIGINT, signal_handler)
 log = init_logger('StrategyRunner')
 
 
-class StrategyRunner(AsyncMixin):
-    async def __ainit__(self, config):
-
-        self.strat = TriangularArbitrage(config)
+class StrategyRunner:
+    def __init__(self, config, strategy):
+        self.strat = StratFactory.make_strat(strategy, config)
+        self.fh = StratFactory.make_feed_handler(strategy, config)
         self.broker = BNBBroker(config)
         self.telegram_sender = TelegramSender(config)
+        self.config = config
+        
+
+    async def initialize(self):
+        if not (self.strat and self.fh):
+            log.critical("Could not initialize strategy or feed_handler, make sure strategy exists")
+            return
         
         await self.broker.init()
 
@@ -27,10 +33,9 @@ class StrategyRunner(AsyncMixin):
         self.strat.reset_balance(balances)
 
         symbols_list = self.strat.get_strat_symbols()
-        
+        self.fh.subscribe(symbols_list)
         self.q = multiprocessing.Queue()
-        self.fh = TickFeedHandler(config, symbols_list)
-        self.fh_process = multiprocessing.Process(name='TickFeedHandler', target=self.fh.run, args=(self.q,))
+        self.fh_process = multiprocessing.Process(name='FeedHandler', target=self.fh.run, args=(self.q,))
 
     async def process_signal(self, signal: Signal):
         try:

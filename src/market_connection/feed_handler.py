@@ -14,21 +14,19 @@ from src.common.utils import init_logger, signal_handler
 from src.common.financial_objects import CandleStickMD, TickMD, MarketDataFrame
 
 signal.signal(signal.SIGINT, signal_handler)
-log = init_logger('FeedHandler')
+log = init_logger('Feeder')
 
 
-class FeedHanlder:
+class IFeeder:
     """
     Generic async class for market data server
     Uses websocket to subscribe to binance MD.
     pushes updates on multiprocess queue
     """
-    def __init__(self, config, symbol_list: list[str]):
-        market_connection = config['FEED_HANDLER']['market_connection']
-        self.logging_interval = int(config['FEED_HANDLER'].get('logging_interval', 60))
+    def __init__(self, config):
+        market_connection = config['FEEDER']['market_connection']
+        self.logging_interval = int(config['FEEDER'].get('logging_interval', 60))
         self._websocket_endpoint = config[market_connection]['websocket_endpoint']
-
-        self.symbol_list = symbol_list
         self.number_of_updates = defaultdict(int)
         self.prev_time = time.time()
   
@@ -39,6 +37,9 @@ class FeedHanlder:
     def get_stream_uri(symbol_list):
         #Method to be overriden per feeder to generate wss uri subscription
         pass 
+
+    def subscribe(self, symbol_list: list[str]):
+        self.symbol_list = symbol_list
 
     def log_stats_info(self, frame):
         """
@@ -85,7 +86,7 @@ class FeedHanlder:
     def run(self, q: multiprocessing.Queue):
         asyncio.run(self.run_(q))
 
-class CandleStickFeedHandler(FeedHanlder):
+class CandleStickFeeder(IFeeder):
     def create_md_frame(self, message) -> CandleStickMD:
         dict_message = json.loads(message)
         data = dict_message.get("data")        
@@ -106,7 +107,7 @@ class CandleStickFeedHandler(FeedHanlder):
         return websocket_uri
 
 
-class TickFeedHandler(FeedHanlder):
+class TickFeeder(IFeeder):
     def create_md_frame(self, message) -> TickMD:
         dict_message = json.loads(message)
         data = dict_message.get("data")        
@@ -132,7 +133,7 @@ def main():
     config.read('config.ini')
 
     logging.root.setLevel(logging.DEBUG)
-    fh = CandleStickFeedHandler(config, ["BTCUSDT", "TRXUSDT"])
+    fh = CandleStickFeeder(config, ["BTCUSDT", "TRXUSDT"])
     q = multiprocessing.Queue()
     fh.run(q)
 

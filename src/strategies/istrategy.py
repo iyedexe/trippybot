@@ -1,6 +1,4 @@
-from src.strategies.istrategy import IStrategy
-
-class ReinforcementLearningStrat(IStrategy):
+class IStrategy:
     def __init__(self):
         pass
 
@@ -8,4 +6,7 @@ class ReinforcementLearningStrat(IStrategy):
         pass
 
     def reset_balance(self, balances):
+        pass
+    
+    def check_opportunity(self, *args):
         pass

@@ -127,7 +127,7 @@ class BNBBroker:
     async def init(self):
         await self.ws_client.establish_connection() 
             
-    async def get_balances(self):
+    async def get_balances(self): #dict(str, float)
         account_status = await self.ws_client.execute_command(self.commands.get_account_status_command)
         balance = {}
         for asset_balance_obj in account_status['balances']:

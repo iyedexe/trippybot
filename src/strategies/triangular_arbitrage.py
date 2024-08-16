@@ -1,13 +1,17 @@
-from src.common.financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
 import datetime
 import time
+
 from timeit import default_timer as timer
+
+from src.common.financial_objects import Way, Signal, OrderType, Order,CoinPair, MarketDataFrame
+from src.strategies.istrategy import IStrategy
 from src.common.utils import init_logger
+
 FEE = 0.1
 RISK = 1
 log = init_logger('Strategy')
 
-class TriangularArbitrage:
+class TriangularArbitrage(IStrategy):
     def __init__(self, config):
         self._config = config
         self._starting_coin = config['STRATEGY']['starting_coin']
