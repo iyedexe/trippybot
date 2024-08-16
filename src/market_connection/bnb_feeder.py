@@ -1,7 +1,5 @@
-import logging
 import asyncio
 import time
-import configparser
 import signal
 import aiohttp
 import json
@@ -126,16 +124,3 @@ class TickBNBFeeder(IBNBFeeder):
         log.info(f"Subscribing to streams : {subscription_subject}")
         websocket_uri = f"stream?streams={subscription_subject}"
         return websocket_uri
-
-
-def main():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
-    logging.root.setLevel(logging.DEBUG)
-    fh = CandleStickBNBFeeder(config, ["BTCUSDT", "TRXUSDT"])
-    q = multiprocessing.Queue()
-    fh.run(q)
-
-if __name__ == "__main__":
-    main()

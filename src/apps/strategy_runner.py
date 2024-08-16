@@ -18,7 +18,6 @@ class StrategyRunner:
         self.telegram_sender = TelegramSender(config)
         self.config = config
         
-
     async def initialize(self):
         if not (self.strat and self.fh):
             log.critical("Could not initialize strategy or feed_handler, make sure strategy exists")

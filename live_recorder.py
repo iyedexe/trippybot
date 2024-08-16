@@ -1,8 +1,8 @@
 import asyncio
 import configparser
 import signal
-from apps.recorder_runner import RecorderRunner
-from common.utils import signal_handler
+from src.apps.recorder_runner import RecorderRunner
+from src.common.utils import signal_handler
 
 signal.signal(signal.SIGINT, signal_handler)
 
